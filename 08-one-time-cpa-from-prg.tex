@@ -1,0 +1,362 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amsthm}
+
+\usepackage{amsthm,amsmath,amsfonts,amssymb,amstext,enumitem}
+\usepackage{latexsym,ifthen,url,rotating,graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning,fit}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+
+
+
+% --- -----------------------------------------------------------------
+% --- Document-specific definitions.
+% --- -----------------------------------------------------------------
+\lstset{
+    columns=fixed,
+    literate={—}{{---}}1 {…}{{...}}1
+}
+
+\newcommand{\todo}[1]{{\color{red}[TODO:{#1}]}}
+
+\newtheorem{problem}{Problem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{exercise}{Exercise}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+
+\newcommand{\getsr}
+  {{\:\stackrel{\raisebox{-2pt}{${\scriptscriptstyle \hspace{0.2em}\$}$}}
+   {\leftarrow}\:}}
+\newcommand{\points}[1]{\textbf{({#1} pts)}}
+
+\newcommand{\fn}{\footnotesize}
+\newcommand{\Colon}{\ : \ }
+\newcommand{\st}{\mathsf{state}}
+\newcommand{\msgs}{\mathcal{M}}
+\newcommand{\ctxts}{\mathcal{C}}
+\newcommand{\keys}{\mathcal{K}}
+\newcommand{\rands}{\mathcal{R}}
+\newcommand{\states}{\mathcal{S}}
+\newcommand{\kg}{\mathcal{K}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\MAC}{\mathrm{MAC}}
+\newcommand{\RMAC}{\mathrm{RMAC}}
+
+\newcommand{\pk}{pk}
+\newcommand{\sk}{sk}
+
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\AES}{\mathsf{AES}}
+
+\newcommand{\algorithm}[1]{\textbf{Alg} {#1}}
+
+\newcommand{\calO}{\mathcal{O}}
+
+\newcommand{\dlog}{\mathrm{dlog}}
+
+\newcommand{\Adv}{\mathbf{Adv}}
+\newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
+\newcommand{\AdvCPA}[2]{\Adv^{\mathrm{ind{-}cpa}}_{#1}({#2})}
+\newcommand{\AdvCCA}[2]{\Adv^{\mathrm{ind{-}cca}}_{#1}({#2})}
+\newcommand{\AdvKR}[2]{\Adv^{\mathrm{kr}}_{#1}({#2})}
+\newcommand{\AdvCKR}[2]{\Adv^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\AdvRMR}[2]{\Adv^{\mathrm{rmr}}_{#1}({#2})}
+\newcommand{\AdvCR}[2]{\Adv^{\mathrm{cr}}_{#1}({#2})}
+\newcommand{\AdvUFCMA}[2]{\Adv^{\textrm{uf{-}cma}}_{#1}({#2})}
+\newcommand{\AdvDL}[2]{\Adv^{\mathrm{dl}}_{#1}({#2})}
+
+\newcommand{\Exp}{\mathbf{Exp}}
+\newcommand{\ExpOW}[1]{\Exp^{\mathrm{ow}}({#1})}
+\newcommand{\ExpCKR}[2]{\Exp^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\ExpRMR}[2]{\Exp^{\mathrm{rmr}}_{#1}({#2})}
+
+\newcommand{\concat}{{\,\|\,}}
+\newcommand{\xor}{\oplus}
+\newcommand{\bits}{\{0,1\}}
+
+\newcommand{\tcolh}{T^{\mathrm{col}}_h}
+\newcommand{\tcolH}{T^{\mathrm{col}}_{H^2}}
+\newcommand{\Hcomb}{H^{1\|2}}
+\newcommand{\Hxor}{H^{1\oplus2}}
+
+\newcommand{\EXP}{\textrm{EXP}}
+\newcommand{\MODEXP}{\textrm{MOD{-}EXP}}
+\newcommand{\ADD}{\textrm{ADD}}
+\newcommand{\MULTIMODEXP}{\textrm{MULTI{-}MOD{-}EXP}}
+\newcommand{\MUL}{\textrm{MUL}}
+\newcommand{\MOD}{\textrm{MOD}}
+
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bC}{\mathbf{C}}
+
+\newcommand{\rvrange}{\mathcal{R}}
+\newcommand{\rspace}{\mathcal{C}}
+
+\newcommand{\hatalpha}{\hat{\alpha}}
+\newcommand{\hatb}{\hat{b}}
+
+\newcommand{\barm}{\overline{m}}
+
+\newcommand{\otp}{\mathrm{OTP}}
+\newcommand{\des}{\mathrm{DES}}
+\newcommand{\twodes}{\mathrm{2DES}}
+\newcommand{\threedes}{\mathrm{3DES}}
+\newcommand{\threedestwo}{\mathrm{3DES2}}
+\newcommand{\aes}{\mathrm{AES}}
+\newcommand{\pad}{\mathsf{pad}}
+\newcommand{\unpad}{\mathsf{unpad}}
+
+
+\newcommand{\Img}{\mathrm{Im}}
+
+\newcommand{\Expt}{\mathbf{Expt}}
+\newcommand{\ExptOTCPA}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa}}}
+\newcommand{\ExptOTCPAone}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}1}}}
+\newcommand{\ExptOTCPAzero}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}0}}}
+\newcommand{\AdvOTCPA}[2]{\Adv^{\mathrm{1\mbox{-}cpa}}_{#1}({#2})}
+\newcommand{\ExptCPAone}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}1}}}
+\newcommand{\ExptCPAzero}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}0}}}
+
+\newcommand{\Piotp}{\Pi_\mathrm{otp}}
+\newcommand{\Encotp}{\Enc_\mathrm{otp}}
+\newcommand{\Decotp}{\Dec_\mathrm{otp}}
+\newcommand{\bhat}{\hat{b}}
+% --- -----------------------------------------------------------------
+% --- Lecture notes formatting macros
+% --- -----------------------------------------------------------------
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+%\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theexercise}{\thelecnum.\arabic{exercise}}
+\renewcommand{\theexample}{\thelecnum.\arabic{example}}
+\renewcommand{\thedefinition}{\thelecnum.\arabic{definition}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thefact}{\thelecnum.\arabic{fact}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[2]{
+   %\pagestyle{myheadings}
+   %\thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
+                        \hfill Autumn 2019} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill #2 \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Instructor: David Cash} \hfill }
+      \vspace{2mm}}
+   }
+   \end{center}
+   %\markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+
+
+
+
+% --- -----------------------------------------------------------------
+% --- The document starts here.
+% --- -----------------------------------------------------------------
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{8}{Notes \#8: Relating One-Time CPA Security to PRG Security}
+
+\tableofcontents
+
+\noindent\hrulefill
+\bigskip
+
+\section{Security of the Pseudo-One-Time-Pad}
+
+The next theorem formalizes the intuition that if $G$ is a ``good PRG'',
+then the pseudo-one-time-pad has ``good one-time-CPA security.''
+Let's just state the theorem and then interpret it later.
+\begin{theorem}
+    Let $G : \bits^n \to \bits^\ell$. Define a deterministic encryption scheme
+    $\Pi = (\Enc, \Dec)$ with key-space $\keys=\bits^n$,
+    message-space $\msgs=\bits^\ell$, and ciphertext-space $\ctxts=\bits^\ell$
+    via
+    \[
+        \Enc(k,m) = G(k)\oplus m, \quad \quad \Dec(k,c) = G(k)\oplus c.
+    \]
+    Then for every adversary $\calA$, there exists another adversary $\calD$,
+    running in about the same time as $\calA$, such that
+    \[
+        \AdvOTCPA{\Pi}{\calA} \leq \AdvPRG{G}{\calD}.
+    \]
+\end{theorem}
+First look at the conclusion of the theorem: It gives an upper bound on
+$\AdvOTCPA{\Pi}{\calA}$, which means it is limiting how well $\calA$
+can do against $\Pi$. This advantage is upper bounded by $\AdvPRG{G}{\calD}$,
+where $\calD$ is a distinguisher running in about the same time as $\calA$.
+
+So, for example, if $G$ is something like ChaCha20, and we believe that
+for all $\calD$ running in time $2^{128}$, $\AdvPRG{G}{\calD}<1/2^{128}$,
+then we can conclude that $\AdvOTCPA{\Pi}{\calA} <1/2^{128}$ for
+any $\calA$ running in time $2^{128}$, which is good one-time-cpa
+security for our encryption scheme.
+
+
+\section{Security Reductions and Proof of Theorem}
+
+In order to prove the theorem, we assume we are given some $\calA$ running in
+some amount of time and achieving some one-time-CPA advantage against $\Pi$,
+and then we build the $\calD$ running in the same time against $\calD$. The
+process of building one algorithm/adversary from another algorithm/adversary is
+called a \emph{security reduction}, and is central to modern cryptography:
+Security reductions relate the security properties of one object (in this case,
+$G$) the security properties of another object (in this case, $\Pi$). We
+stress that we'd rather not resort to this analysis in a perfect world,
+and just directly prove that $\AdvOTCPA{\Pi}{\calA}$ is small. But 
+theoretical computer science is simply unable to prove such statements today
+(this is on the level of proving $P\neq NP$, and probably much harder).
+
+So let's do the formal proof. We must build some $\calD$ that takes as
+input a string $w\in\bits^\ell$ and then outputs $0$ or $1$.
+Here is the $\calD$ that works for the proof:
+\begin{center}
+    \begin{tabular}{c}
+        \begin{minipage}{2in}\begin{tabbing}
+            123\=123\=\kill
+            \underline{$\calD(w)$} \\[2pt]
+            \> Run $\calA$, which produces $(m_0,m_1)\in\msgs$\\
+            \> Pick $b\getsr \bits$\\
+            \> Compute $c \gets w\oplus m_b$\\
+            \> Run $\calA(c)$, which produces $\hatb\in\bits$\\
+            \> If $\hatb = b$: Output 1\\
+            \> Else: Output 0
+        \end{tabbing}\end{minipage}
+    \end{tabular}
+\end{center}
+Here is the intuition for this distinguisher. It is trying to tell if $w$ was
+drawn as an output of $G$ or as a uniformly random string. It is going to run
+$\calA$, who cannot tell it is running inside of $\calD$; it's just an
+algorithm that accepts inputs and provides outputs. In order to run $\calA$,
+$\calD$ is going to pretend to be the one-time-CPA experiment, picking the bit
+$b$ itself and checking if $\calA$ appears to be winning the
+pretend-experiment.
+
+We have designed $\calD$ so that if the input $w$ was chosen uniformly at
+random, then $\calA$ has no chance at doing better than $1/2$ in the
+pretend-experiment $\calD$ is running, and thus can only cause $\calD$ to
+output $1$ with probability $1/2$. In this case $\calA$ is effectively
+attacking the one-time pad. But if $w$ is drawn according to $G(k)$, then
+$\calA$ is effectively attacking $\Pi$, and it will tend to win. The
+distinguisher observes if $\calA$ is winning or not, and then infers how $w$
+must have been drawn.
+
+In summary we have the two trains of reasoning:
+\begin{align*}
+    \text{$w$ is uniformly random} 
+    & \implies \text{$\calA$ is attacking OTP in pretend-experiment} \\
+    & \implies \text{$\calA$ can only randomly guess $b$} \\
+    & \implies \text{$\calD$ outputs $1$ with probability $1/2$}.
+\end{align*}
+And:
+\begin{align*}
+    \text{$w$ is drawn according to $G(k)$} 
+    & \implies \text{$\calA$ is attacking $\Pi$ in pretend-experiment} \\
+    & \implies \text{$\calA$ will guess $b$ with probability higher than $1/2$} \\
+    & \implies \text{$\calD$ outputs $1$ with probability higher than $1/2$}.
+\end{align*}
+Together these will give the theorem.
+Formally, we have the following two equations:
+\[
+    \Pr[\calD(\bU) = 1] = 
+    \Pr[\ExptOTCPA_{\Piotp}(\calA) = 1] = \frac{1}{2}
+\]
+\[
+    \Pr[\calD(G(\bK)) = 1] = 
+    \Pr[\ExptOTCPA_\Pi(\calA) = 1]
+\]
+These claims are not usually justified with much calculation: A reduction
+should be phrased so that they are apparent from the description. Here
+is what should be checked in order to justify these equations:
+\begin{itemize}
+
+    \item The ciphertext $c$ provided to $\calA$ is drawn from the \emph{same
+        distribution} as in the corresponding experiment.
+
+    \item The output of $\calD$ should be determined in exactly the same way as
+        in the corresponding experiment.
+
+\end{itemize}
+In this case, you can check that once $w$ is replaced with a random string,
+then $\calD$ is computing \emph{exactly} $\ExptOTCPA_{\Piotp}(\calA)$,
+while is if $w$ is $G(k)$ for a uniformly random $k$, then $\calD$
+is computing \emph{exactly} $\ExptOTCPA_\Pi(\calA)$. That is enough
+to verify both equations.
+
+The rest of the proof is just algebra:
+\begin{align*}
+    \AdvPRG{G}{\calD} 
+    & = \left|\Pr[\calD(G(\bK)) = 1] - \Pr[\calD(\bU) = 1]\right| \\
+    & = \left|\Pr[\ExptOTCPA_\Pi(\calA) = 1]
+    -  \Pr[\ExptOTCPA_{\Piotp}(\calA) = 1]\right| \\
+    & = \left|\Pr[\ExptOTCPA_\Pi(\calA) = 1]
+    -  \frac{1}{2}\right| \\
+    & = \AdvOTCPA{\Pi}{\calA}. 
+\end{align*}
+
+\begin{exercise}
+    State and prove a similar theorem for the ``inverted pseudo-one-time-pad''
+    defined by
+    \[
+        \Enc(k,m) = \overline{G(k)}\oplus m,
+    \]
+    where $\overline{G(k)}$ is the bitwise-complement of $G(k)$. What
+    needs to change in $\calD$?
+\end{exercise}
+
+
+%
+%In this definition we will need the concept of an \emph{oracle} for an
+%algorithm.  You can think about oracles intuitively as ``subroutines'' that an
+%algorithm can call. When $\calA$ is an oracle algorithm and $O_1$ is a
+%function, we write $\calA^{O_1}$ for $\calA$ connected to the oracle
+%(subroutine) $O_1$. If $O_2$ is another oracle, we write $\calA^{O_2}$ for
+%$\calA$ connected to $O_2$, and so on. 
+%
+%A key point in this formalism is that $\calA$ can only observe the input/output
+%behavior of its oracle, and \emph{not the code implementing the oracle}.  So if
+%$O_1$ and $O_2$ are the same function, then $\calA^{O_1}$ and $\calA^{O_2}$
+%will behave exactly the same. 
+%
+%
+\end{document}
+
