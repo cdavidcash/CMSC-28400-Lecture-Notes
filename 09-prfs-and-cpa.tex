@@ -1,0 +1,518 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amsthm}
+
+\usepackage{amsthm,amsmath,amsfonts,amssymb,amstext,enumitem}
+\usepackage{latexsym,ifthen,url,rotating,graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning,fit}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+
+
+
+% --- -----------------------------------------------------------------
+% --- Document-specific definitions.
+% --- -----------------------------------------------------------------
+\lstset{
+    columns=fixed,
+    literate={—}{{---}}1 {…}{{...}}1
+}
+
+\newcommand{\todo}[1]{{\color{red}[TODO:{#1}]}}
+
+\newtheorem{problem}{Problem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{exercise}{Exercise}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+
+\newcommand{\getsr}
+  {{\:\stackrel{\raisebox{-2pt}{${\scriptscriptstyle \hspace{0.2em}\$}$}}
+   {\leftarrow}\:}}
+\newcommand{\points}[1]{\textbf{({#1} pts)}}
+
+\newcommand{\fn}{\footnotesize}
+\newcommand{\Colon}{\ : \ }
+\newcommand{\st}{\mathsf{state}}
+\newcommand{\msgs}{\mathcal{M}}
+\newcommand{\ctxts}{\mathcal{C}}
+\newcommand{\keys}{\mathcal{K}}
+\newcommand{\rands}{\mathcal{R}}
+\newcommand{\states}{\mathcal{S}}
+\newcommand{\kg}{\mathcal{K}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\MAC}{\mathrm{MAC}}
+\newcommand{\RMAC}{\mathrm{RMAC}}
+
+\newcommand{\pk}{pk}
+\newcommand{\sk}{sk}
+
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\AES}{\mathsf{AES}}
+
+\newcommand{\algorithm}[1]{\textbf{Alg} {#1}}
+
+\newcommand{\calO}{\mathcal{O}}
+
+\newcommand{\dlog}{\mathrm{dlog}}
+
+\newcommand{\Adv}{\mathbf{Adv}}
+\newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
+\newcommand{\AdvCPA}[2]{\Adv^{\mathrm{cpa}}_{#1}({#2})}
+\newcommand{\AdvCCA}[2]{\Adv^{\mathrm{ind{-}cca}}_{#1}({#2})}
+\newcommand{\AdvKR}[2]{\Adv^{\mathrm{kr}}_{#1}({#2})}
+\newcommand{\AdvCKR}[2]{\Adv^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\AdvRMR}[2]{\Adv^{\mathrm{rmr}}_{#1}({#2})}
+\newcommand{\AdvCR}[2]{\Adv^{\mathrm{cr}}_{#1}({#2})}
+\newcommand{\AdvUFCMA}[2]{\Adv^{\textrm{uf{-}cma}}_{#1}({#2})}
+\newcommand{\AdvDL}[2]{\Adv^{\mathrm{dl}}_{#1}({#2})}
+
+\newcommand{\Exp}{\mathbf{Exp}}
+\newcommand{\ExpOW}[1]{\Exp^{\mathrm{ow}}({#1})}
+\newcommand{\ExpCKR}[2]{\Exp^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\ExpRMR}[2]{\Exp^{\mathrm{rmr}}_{#1}({#2})}
+
+\newcommand{\concat}{{\,\|\,}}
+\newcommand{\xor}{\oplus}
+\newcommand{\bits}{\{0,1\}}
+
+\newcommand{\tcolh}{T^{\mathrm{col}}_h}
+\newcommand{\tcolH}{T^{\mathrm{col}}_{H^2}}
+\newcommand{\Hcomb}{H^{1\|2}}
+\newcommand{\Hxor}{H^{1\oplus2}}
+
+\newcommand{\EXP}{\textrm{EXP}}
+\newcommand{\MODEXP}{\textrm{MOD{-}EXP}}
+\newcommand{\ADD}{\textrm{ADD}}
+\newcommand{\MULTIMODEXP}{\textrm{MULTI{-}MOD{-}EXP}}
+\newcommand{\MUL}{\textrm{MUL}}
+\newcommand{\MOD}{\textrm{MOD}}
+
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bof}{\mathbf{f}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bC}{\mathbf{C}}
+
+\newcommand{\rvrange}{\mathcal{R}}
+\newcommand{\rspace}{\mathcal{C}}
+
+\newcommand{\hatalpha}{\hat{\alpha}}
+\newcommand{\hatb}{\hat{b}}
+
+\newcommand{\barm}{\overline{m}}
+
+\newcommand{\otp}{\mathrm{OTP}}
+\newcommand{\des}{\mathrm{DES}}
+\newcommand{\twodes}{\mathrm{2DES}}
+\newcommand{\threedes}{\mathrm{3DES}}
+\newcommand{\threedestwo}{\mathrm{3DES2}}
+\newcommand{\aes}{\mathrm{AES}}
+\newcommand{\pad}{\mathsf{pad}}
+\newcommand{\unpad}{\mathsf{unpad}}
+\newcommand{\Func}{\mathrm{Func}}
+
+
+\newcommand{\Img}{\mathrm{Im}}
+
+\newcommand{\Expt}{\mathbf{Expt}}
+\newcommand{\ExptCPA}{\mathbf{Expt}^{\mathrm{cpa}}}
+\newcommand{\ExptCCA}{\mathbf{Expt}^{\mathrm{cca}}}
+\newcommand{\ExptOTCPA}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa}}}
+\newcommand{\ExptOTCPAone}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}1}}}
+\newcommand{\ExptOTCPAzero}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}0}}}
+\newcommand{\AdvOTCPA}[2]{\Adv^{\mathrm{1\mbox{-}cpa}}_{#1}({#2})}
+\newcommand{\ExptCPAone}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}1}}}
+\newcommand{\ExptCPAzero}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}0}}}
+
+\newcommand{\LR}{\mathrm{LR}}
+
+\newcommand{\Piotp}{\Pi_\mathrm{otp}}
+\newcommand{\Encotp}{\Enc_\mathrm{otp}}
+\newcommand{\Decotp}{\Dec_\mathrm{otp}}
+\newcommand{\bhat}{\hat{b}}
+\newcommand{\dict}{\mathtt{dict}}
+\newcommand{\Col}{\mathsf{Col}}
+% --- -----------------------------------------------------------------
+% --- Lecture notes formatting macros
+% --- -----------------------------------------------------------------
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+%\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theexercise}{\thelecnum.\arabic{exercise}}
+\renewcommand{\theexample}{\thelecnum.\arabic{example}}
+\renewcommand{\thedefinition}{\thelecnum.\arabic{definition}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thefact}{\thelecnum.\arabic{fact}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[2]{
+   %\pagestyle{myheadings}
+   %\thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
+                        \hfill Autumn 2019} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill #2 \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Instructor: David Cash} \hfill }
+      \vspace{2mm}}
+   }
+   \end{center}
+   %\markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+
+
+
+
+% --- -----------------------------------------------------------------
+% --- The document starts here.
+% --- -----------------------------------------------------------------
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{9}{Notes \#9: Pseudorandom Functions and (Many-Time) CPA Security}
+
+\tableofcontents
+
+\noindent\hrulefill
+\bigskip
+
+\section{Pseudorandom Functions}
+
+We now give an abstraction describing a main security goal of block ciphers.
+In this definition we will need the concept of an \emph{oracle} for an
+algorithm.  You can think about oracles intuitively as ``subroutines'' that an
+algorithm can call. When $\calA$ is an oracle algorithm and $O_1$ is a
+function, we write $\calA^{O_1}$ for $\calA$ connected to the oracle
+(subroutine) $O_1$. If $O_2$ is another oracle, we write $\calA^{O_2}$ for
+$\calA$ connected to $O_2$, and so on.  A key point in this formalism is that
+$\calA$ can only observe the input/output behavior of its oracle, and \emph{not
+the code implementing the oracle}.  So if $O_1$ and $O_2$ are the same
+function, then $\calA^{O_1}$ and $\calA^{O_2}$ will behave exactly the same. 
+
+The following definition also needs the concept of a \emph{random function}
+$\bof:\bits^\ell\to\bits^\ell$. You can think of such a random variable
+as a table listing an output for every possible input, and such that
+the outputs are all uniformly random and independent. For a concrete
+example with $\ell=3$, we might have $\bof$ represented by the table:
+\begin{center}
+\begin{tabular}{c|c}
+    $x$ & $f(x)$ \\\hline
+    $000$ & $100$ \\
+    $001$ & $011$ \\
+    $010$ & $000$ \\
+    $011$ & $101$ \\
+    $100$ & $011$ \\
+    $100$ & $111$ \\
+    $101$ & $001$ \\
+    $110$ & $000$ \\
+    $111$ & $110$
+\end{tabular}
+\end{center}
+So ``picking a random function'' means filling in the right side of the table
+with uniformly random and independent entries. These entries may repeat, but
+the outcome of one entry does not influence the outcome of any other entry.
+
+\begin{example}
+Let $\bof$ be a random function from $\bits^{128}$ to $\bits^{128}$.
+Then the following hold:
+    \begin{align*}
+        \Pr[\bof(0^{128}) = 0^{128}] &= \frac{1}{128}, \\
+        \Pr[\bof(0^{128}) \text{ starts with $0$}] &= \frac{1}{2}, \\
+        \Pr[\bof(0^{128}) = \bof(1^{128})] &= \frac{1}{128}, \\
+        \Pr[\bof(0^{128}) \oplus \bof(1^{128}) = 1^{128}] &= \frac{1}{128}.
+    \end{align*}
+    These can be proved rigorously by the independence and uniformity of
+    $\bof(0^{128})$ and $\bof(1^{128})$ (or, one could actually count
+    the fraction of all possible functions for which these hold).
+    
+    Things are not always so simple. For instance,
+    \begin{align*}
+        \Pr[\bof(\bof(0^{128})) = 0^{128}] &= 
+        \frac{1}{2^{128}} + (1-\frac{1}{2^{128}})\frac{1}{2^{128}},
+    \end{align*}
+    which can be seen by applying the law of total probability to split
+    up the probability into the cases where $f(0^{128})=0^{128}$ and
+     $f(0^{128})\neq0^{128}$.
+\end{example}
+
+\begin{exercise}
+    Let $\Func(\bits^\ell,\bits^\ell)$ be the set of all functions from
+$\bits^\ell$ to $\bits^\ell$. This set has size $2^{\ell2^\ell}$. Using the
+table point of view on functions, or another method, explain this formula.
+\end{exercise}
+
+We can now state the definition, and afterwards interpret it.
+\begin{definition}
+    Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ and $\calA$ be an adversary.
+    Let $\bK$ be uniform on $\bits^n$, and let $\bof$ be a random function
+    from $\bits^\ell$ to $\bits^\ell$.
+    We define the \emph{pseudorandom function (PRF) distinguishing advantage
+    of $\calA$ against $E$} to be
+    \[
+        \AdvPRF{E}{\calA} =
+        \left|\Pr[\calA^{E(\bK,\cdot)}=1]-\Pr[\calA^{\bof(\cdot)}=1]\right|.
+    \]
+\end{definition}
+
+An adversary $\calA$ can be judged according to its runtime, the number of
+queries it issues, and its advantage. We won't distinguish much between runtime
+and queries, but in practice an adversary will usually have far more
+computation time than it does queries, because the queries need to be run by
+the parties under attack. They won't be enabling anything like $2^{80}$ queries,
+but the adversary might have that much computation.  If the advantage of every
+reasonable $\calA$ is small (say $\frac{1}{2^{64}}$ or $\frac{1}{2^{128}}$,
+depending on the application), we informally say that $E$ is a good PRF. 
+
+In that case we think of $E$ as ``essentially looking like a
+random function,'' and all of the properties of random functions are thus
+inherited by $E$. So $E(\bK,x)$ and $E(\bK,x')$ should look like totally
+random, independent strings, when $x\neq x'$, even when they differ only by one
+bit. If not, then there would be an adversary with good PRF advantage.
+
+\begin{example}
+    Suppose $E:\bits^{128}\times\bits^{128}\to\bits^{128}$ satisfies
+    $E(k,0^{128})=0^{128}$ for every $k\in\bits^{128}$. We show that
+    $E$ is not a good PRF. Consider $\calA^\calO$ that queries $0^{128}$
+    to its oracle $\calO$ and calls the response $y$. If $y=0^{128}$
+    then $\calA$ outputs $1$, else $0$. Then
+    \[
+        \Pr[\calA^{E(\bK,\cdot)}=1]=1
+    \]
+    and
+    \[
+        \Pr[\calA^{\bof(\cdot)}=1] = \frac{1}{2^{128}},
+    \]
+    the latter because a random function satisfies $\bof(0^{128})=0^{128}$
+    with probability $\frac{1}{2^{128}}$. Thus
+    \[
+        \AdvPRF{E}{\calA} = 1 - \frac{1}{2^{128}},
+    \]
+    which is high.
+\end{example}
+Note that we had to define $\calA$ with respect to a generic oracle $\calO$;
+We don't get to say how $\calA$ works with $E(\bK,\cdot)$ and $\bof(\cdot)$
+separately, since $\calA$ only gets to see their input/output behavior.
+More complicated patterns can be found with more clever attacks.
+\begin{example}
+    Define $E:\bits^{128}\times\bits^{128}\to\bits^{128}$ by
+    $E(k,x)=k\oplus x$.
+    We show that
+    $E$ is not a good PRF. Consider $\calA^\calO$ that fixes any
+    $x_1\neq x_2\in\bits^{128}$, 
+    queries $y_1 \gets \calO(x_1)$, and
+    $y_2 \gets \calO(x_2)$. 
+    If $y_1\oplus y_2 = x_1 \oplus x_2$ then $\calA$ outputs $1$, 
+    else it outputs $0$.
+    \[
+        \Pr[\calA^{E(\bK,\cdot)}=1]=1
+    \]
+    and
+    \[
+        \Pr[\calA^{\bof(\cdot)}=1] 
+        \Pr[\bof(x_1)\oplus \bof(x_2)=x_1\oplus x_2] = \frac{1}{2^{128}},
+    \]
+    the latter because a random function satisfies that
+    equation
+    with probability $\frac{1}{2^{128}}$ (because $\bof(x_1),\bof(x_2)$ are
+    uniform and independent). Thus
+    \[
+        \AdvPRF{E}{\calA} = 1 - \frac{1}{2^{128}},
+    \]
+    which is high. Note that we needed two queries to break this one -- It's
+    actually impossible to break it in one query!
+\end{example}
+
+Finally we address the need for oracles in the definition. It would be simpler
+to, say, provide a function table (like the one we diagrammed above) to
+$\calA$, and ask it if the table represents $E(\bK,\cdot)$ or $\bof$.  But this
+table would gigantic for the sizes we care about: $2^{128}\cdot 128$ bits for
+$\AES$. But no algorithm with realistic resources could even read its input in
+that case. We resort to oracles to allow ``selective'' access to parts of
+the function without paying a huge runtime.
+
+\section{Birthday Attacks}
+
+You may have noticed that in the definition of PRF advantage, when
+the oracle is $E(\bK,\cdot)$, then the adversary will never see
+a repeated output for two distinct inputs. But when the oracle
+is $\bof(\cdot)$ then two distinct inputs will produce the same
+output with non-zero probability. This suggests the following adversary, which
+attacks $E:\bits^n\times\bits^k\to\bits^k$ and issues some number $q\leq
+2^{\ell}$ queries: 
+\begin{center}
+    \begin{tabular}{c}
+        \begin{minipage}{2in}\begin{tabbing}
+            123\=123\=\kill
+            \underline{Adversary $\calA^{\calO}$}\\[2pt]
+            \> Initialize an empty set $S$ \\
+            \> For $i=1,\ldots,q$: \\
+            \> \> Let $x_i\in\bits^\ell$ be the $\ell$-bit encoding of $i$\\
+            \> \> Query $y_i \gets \calO(x_i)$\\
+            \> \> If $y_i \in S$: Output $1$ \\
+            \> \> Add $y_i$ to $S$\\
+            \> Output $0$
+        \end{tabbing}\end{minipage}
+    \end{tabular}
+\end{center}
+The set $S$ could be implemented with a hash table or another data structure
+that allows for fast membership testing and fast addition.
+
+Let's find the advantage of this adversary. First it is simple to show
+that
+\[
+    \Pr[\calA^{E(\bK,\cdot)}=1]=0
+\]
+because the $y_i$ will all be distinct points, and hence will never
+be in $S$ in the for loop. This is because the $y_i$ are the outputs
+of a block cipher applied with the same key to distinct inputs.
+On the other hand,
+\[
+    \Pr[\calA^{\bof(\cdot)}=1]
+\]
+is less obvious to calculate. We will need the following interesting
+and well-known ``birthday bound''.
+
+\begin{theorem}
+    Let $N,q\geq 1$ be integers, and let $\Col(N,q)$ be the probability that
+    there is a repeated value (a \emph{collision}) in $q$ independent uniform
+    samples from a set of size $N$. Then
+    \[
+        1 - \exp{-q(q-1)/2N} \leq \Col(N,q) \leq 0.5\frac{q(q-1)}{N}.
+    \]
+    If $q\leq \sqrt{2N}$, then this implies
+    \[
+        0.3 \frac{q(q-1)}{N} \leq \Col(N,q) \leq 0.5\frac{q(q-1)}{N}.
+    \]
+\end{theorem}
+Above $\exp(x)=e^x$ is the usual exponential function from calculus.
+\begin{exercise}
+    Prove the upper bound of the theorem via a union bound.
+\end{exercise}
+The lower bound is only slightly harder to prove; See page 273 of
+\url{https://web.cs.ucdavis.edu/~rogaway/classes/227/spring05/book/main.pdf}.
+
+What is surprising about this bound is that the probability of a collision
+is approximately $q^2/N$ and not $q/N$. In particular, once $q$ is only
+a little larger than $\sqrt{N}$, the probability jumps up exponentially close
+$1$ and is therefore almost certain. This results in some surprising
+phenomena, like the result of the following exercise
+\begin{exercise}
+    Use the theorem to find the minimum number $q$ of people required to have
+    a $1/2$ or greater chance of two people having the same birthday. Assume
+    birthdays are uniformly random and independent values amongst the
+    $365$ days of the year.
+\end{exercise}
+
+Returning to our adversary, and assuming $q\leq \sqrt{2\cdot 2^\ell}$, we
+have
+\[
+    \Pr[\calA^{\bof(\cdot)}=1] \geq 0.3 \frac{q(q-1)}{2^\ell},
+\]
+because the $y_i$ values in the algorithm are all uniform and independent
+samples from a set of size $2^\ell$ when the oracle is a random function. 
+Thus
+\begin{align*}
+    \AdvPRF{E}{\calA} 
+    & = \left|\Pr[\calA^{E(\bK,\cdot)}=1]-\Pr[\calA^{\bof(\cdot)}=1]\right| \\
+    & = \left|0-\Pr[\calA^{\bof(\cdot)}=1]\right| \\
+    & = \Pr[\calA^{\bof(\cdot)}=1] \\
+    & \geq  0.3 \frac{q(q-1)}{2^\ell}.
+\end{align*}
+Thus, for $\ell$-bit outputs, we only need $q\approx 2^{\ell/2}$, not
+$q\approx 2^{\ell}$ queries, to have good PRF advantage! For AES, this
+means about $2^{64}$ queries suffice, which is astronomically smaller
+than $2^{128}$.
+
+These attacks are called ``birthday attacks,'' and are avoidable if one
+insists on working with a block cipher (as we do). Thus we'll aim for
+a block cipher to have \emph{only} this defect, and remain a good PRF
+until about $2^{\ell/2}$ queries are issued.
+
+\section{Chosen-Plaintext Security}
+
+We now extend the one-time CPA definition to many queries.
+
+\begin{definition}
+    Let $\Pi = (\Enc,\Dec)$ be a randomized encryption scheme with key-space
+    $\keys$, message-space $\msgs$, randomness-space $\rands$, and
+    ciphertext-space $\ctxts$.  We assume that the message-space $\msgs$ is a
+    set of bit strings, i.e.  $\msgs\subseteq\bits^*$.  Let $\calA$ be an
+    algorithm. Define algorithm $\ExptCPA_\Pi(\calA)$ as
+    \begin{center}
+    \begin{tabular}{c}
+        \begin{minipage}{2in}\begin{tabbing}
+            123\=123\=\kill
+            \underline{\algorithm{$\ExptCPA_\Pi(\calA)$}} \\[2pt]
+            \fn01 \> Pick $k\getsr \keys, b\getsr \bits$\\
+            \fn02 \> Run $\calA^{\LR_{k,b}(\cdot,\cdot)}$, where the oracle
+            is given below. Eventually $\calA$ halts with output $\hatb$\\
+            \fn03\> If $\hatb = b$: Output 1\\
+            \fn06 \> Else: Output 0\\
+            \\
+            \underline{Oracle $\LR_{k,b}(m_0,m_1)$} \\
+            \> If $m_0,m_1$ are not the same length: Return $\bot$\\
+            \> Pick $r \getsr \rands$\\
+            \> Compute $c \gets \Enc(k,m_b,r)$\\
+            \> Return $c$
+        \end{tabbing}\end{minipage}
+    \end{tabular}
+    \end{center}
+    Define the \emph{CPA advantage of $\calA$ against $\Pi$} as
+    \[
+        \AdvCPA{\Pi}{\calA} =
+        \left|\Pr[\ExptCPA_\Pi(\calA) = 1] - \frac{1}{2}\right|
+    \]
+
+    The definition for the stateful version of the scheme
+    is the same, except the oracle works as follows:
+    \begin{center}
+        \begin{tabular}{c}
+            \begin{minipage}{2in}\begin{tabbing}
+                123\=123\=\kill
+                \underline{Oracle $\LR_{k,b}(m_0,m_1)$} \\
+                \> If $m_0,m_1$ are not the same length: Return $\bot$\\
+                \> Compute $(c,s') \gets \Enc(k,m_b,s)$\\
+                \> Overwrite the current state $s$ with $s'$ \\
+                \> Return $c$
+            \end{tabbing}\end{minipage}
+        \end{tabular}
+    \end{center}
+\end{definition}
+
+
+
+\end{document}
+
