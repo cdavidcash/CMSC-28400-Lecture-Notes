@@ -1,0 +1,327 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amsthm}
+
+\usepackage{amsthm,amsmath,amsfonts,amssymb,amstext,enumitem}
+\usepackage{latexsym,ifthen,url,rotating,graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning,fit}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+
+
+
+% --- -----------------------------------------------------------------
+% --- Document-specific definitions.
+% --- -----------------------------------------------------------------
+\lstset{
+    columns=fixed,
+    literate={—}{{---}}1 {…}{{...}}1
+}
+
+\newcommand{\todo}[1]{{\color{red}[TODO:{#1}]}}
+
+\newtheorem{problem}{Problem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{exercise}{Exercise}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+
+\newcommand{\getsr}
+  {{\:\stackrel{\raisebox{-2pt}{${\scriptscriptstyle \hspace{0.2em}\$}$}}
+   {\leftarrow}\:}}
+\newcommand{\points}[1]{\textbf{({#1} pts)}}
+
+\newcommand{\fn}{\footnotesize}
+\newcommand{\Colon}{\ : \ }
+\newcommand{\st}{\mathsf{state}}
+\newcommand{\msgs}{\mathcal{M}}
+\newcommand{\ctxts}{\mathcal{C}}
+\newcommand{\keys}{\mathcal{K}}
+\newcommand{\rands}{\mathcal{R}}
+\newcommand{\states}{\mathcal{S}}
+\newcommand{\kg}{\mathcal{K}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\MAC}{\mathrm{MAC}}
+\newcommand{\RMAC}{\mathrm{RMAC}}
+
+\newcommand{\pk}{pk}
+\newcommand{\sk}{sk}
+
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\AES}{\mathsf{AES}}
+
+\newcommand{\algorithm}[1]{\textbf{Alg} {#1}}
+
+\newcommand{\calO}{\mathcal{O}}
+
+\newcommand{\dlog}{\mathrm{dlog}}
+
+\newcommand{\Adv}{\mathbf{Adv}}
+\newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
+\newcommand{\AdvCPA}[2]{\Adv^{\mathrm{cpa}}_{#1}({#2})}
+\newcommand{\AdvCCA}[2]{\Adv^{\mathrm{ind{-}cca}}_{#1}({#2})}
+\newcommand{\AdvKR}[2]{\Adv^{\mathrm{kr}}_{#1}({#2})}
+\newcommand{\AdvCKR}[2]{\Adv^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\AdvRMR}[2]{\Adv^{\mathrm{rmr}}_{#1}({#2})}
+\newcommand{\AdvCR}[2]{\Adv^{\mathrm{cr}}_{#1}({#2})}
+\newcommand{\AdvUFCMA}[2]{\Adv^{\textrm{uf{-}cma}}_{#1}({#2})}
+\newcommand{\AdvDL}[2]{\Adv^{\mathrm{dl}}_{#1}({#2})}
+
+\newcommand{\Exp}{\mathbf{Exp}}
+\newcommand{\ExpOW}[1]{\Exp^{\mathrm{ow}}({#1})}
+\newcommand{\ExpCKR}[2]{\Exp^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\ExpRMR}[2]{\Exp^{\mathrm{rmr}}_{#1}({#2})}
+
+\newcommand{\concat}{{\,\|\,}}
+\newcommand{\xor}{\oplus}
+\newcommand{\bits}{\{0,1\}}
+
+\newcommand{\tcolh}{T^{\mathrm{col}}_h}
+\newcommand{\tcolH}{T^{\mathrm{col}}_{H^2}}
+\newcommand{\Hcomb}{H^{1\|2}}
+\newcommand{\Hxor}{H^{1\oplus2}}
+
+\newcommand{\EXP}{\textrm{EXP}}
+\newcommand{\MODEXP}{\textrm{MOD{-}EXP}}
+\newcommand{\ADD}{\textrm{ADD}}
+\newcommand{\MULTIMODEXP}{\textrm{MULTI{-}MOD{-}EXP}}
+\newcommand{\MUL}{\textrm{MUL}}
+\newcommand{\MOD}{\textrm{MOD}}
+
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bof}{\mathbf{f}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bC}{\mathbf{C}}
+
+\newcommand{\rvrange}{\mathcal{R}}
+\newcommand{\rspace}{\mathcal{C}}
+
+\newcommand{\hatalpha}{\hat{\alpha}}
+\newcommand{\hatb}{\hat{b}}
+
+\newcommand{\barm}{\overline{m}}
+
+\newcommand{\otp}{\mathrm{OTP}}
+\newcommand{\des}{\mathrm{DES}}
+\newcommand{\twodes}{\mathrm{2DES}}
+\newcommand{\threedes}{\mathrm{3DES}}
+\newcommand{\threedestwo}{\mathrm{3DES2}}
+\newcommand{\aes}{\mathrm{AES}}
+\newcommand{\pad}{\mathsf{pad}}
+\newcommand{\unpad}{\mathsf{unpad}}
+\newcommand{\Func}{\mathrm{Func}}
+
+
+\newcommand{\Img}{\mathrm{Im}}
+
+\newcommand{\Expt}{\mathbf{Expt}}
+\newcommand{\ExptCPA}{\mathbf{Expt}^{\mathrm{cpa}}}
+\newcommand{\ExptCCA}{\mathbf{Expt}^{\mathrm{cca}}}
+\newcommand{\ExptOTCPA}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa}}}
+\newcommand{\ExptOTCPAone}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}1}}}
+\newcommand{\ExptOTCPAzero}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}0}}}
+\newcommand{\AdvOTCPA}[2]{\Adv^{\mathrm{1\mbox{-}cpa}}_{#1}({#2})}
+\newcommand{\ExptCPAone}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}1}}}
+\newcommand{\ExptCPAzero}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}0}}}
+
+\newcommand{\LR}{\mathrm{LR}}
+
+\newcommand{\Piotp}{\Pi_\mathrm{otp}}
+\newcommand{\Encotp}{\Enc_\mathrm{otp}}
+\newcommand{\Decotp}{\Dec_\mathrm{otp}}
+\newcommand{\bhat}{\hat{b}}
+\newcommand{\dict}{\mathtt{dict}}
+\newcommand{\Col}{\mathsf{Col}}
+% --- -----------------------------------------------------------------
+% --- Lecture notes formatting macros
+% --- -----------------------------------------------------------------
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+%\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theexercise}{\thelecnum.\arabic{exercise}}
+\renewcommand{\theexample}{\thelecnum.\arabic{example}}
+\renewcommand{\thedefinition}{\thelecnum.\arabic{definition}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thefact}{\thelecnum.\arabic{fact}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[2]{
+   %\pagestyle{myheadings}
+   %\thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
+                        \hfill Autumn 2019} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill #2 \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Instructor: David Cash} \hfill }
+      \vspace{2mm}}
+   }
+   \end{center}
+   %\markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+
+
+
+
+% --- -----------------------------------------------------------------
+% --- The document starts here.
+% --- -----------------------------------------------------------------
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{10}{Notes \#10: CPA Security from a PRF}
+
+%\tableofcontents
+
+\noindent\hrulefill
+\bigskip
+
+\begin{theorem}
+Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ be a block cipher. 
+Define a randomized encryption encryption scheme 
+    $\Pi=(\Enc,\Dec)$ with key-space $\bits^n$, message-
+    and randomness-spaces $\msgs=\rands=\bits^\ell$, and ciphertext-space
+    $\ctxts=\bits^\ell\times\bits^\ell$ by
+    \[
+        \Enc(k,m,r)=(r,E(k,r)\oplus m)
+    \]
+    and $\Dec(k,(r,c)) = E(k,r)\oplus c$. Then for every $\calA$ there
+    exists a $\calB$, running in about the same time as $\calA$, such
+    that
+    \[
+        \AdvCPA{\Pi}{\calA} \leq \AdvPRF{E}{\calB} + \Col(2^\ell,q),
+    \]
+    where $q$ is the number queries issued by $\calA$.
+\end{theorem}
+\begin{proof}
+    We construct the needed adversary $\calB$, which has access to an oracle
+    $\calO$ that is either $E$ with a random key, or a random function $f$.
+    The high-level idea is similar to the reduction to PRG security for
+    one-time CPA, in that $\calB$ will need to ``simulate'' the CPA game for
+    $\calA$. The main differences for the simulation are that $\calB$ has an
+    oracle instead of an input, and the scheme $\Pi$ under consideration is
+    randomized rather than deterministic. The similarity is that we want
+    $\calB$, when connected to the oracle $E(\bK,\cdot)$, to simulate
+    \emph{exactly} $\ExptCPA_{\Pi}(\calA)$, while if the oracle is
+    $\bof(\cdot)$ then we want to simulate a game that $\calA$ can't win
+    too often.
+
+    Our $\calB$ has access to an oracle $\calO(\cdot)$ mapping $\bits^\ell$ to
+    $\bits^\ell$; It is trying to determine if $\calO(\cdot)=E(\bK,\cdot)$
+    or $\calO(\cdot)=\bof(\cdot)$.
+
+    The adversary $\calB^\calO$
+    picks a bit $b$ and runs $\calA$. 
+    When $\calA$ queries $\LR_{k,b}(m_0,m_1)$,
+    $\calB$ picks $r\in\bits^\ell$ and returns
+    \[
+        (r, \calO(r)\oplus m_B).
+    \]
+    Eventually when $\calA$ halts with bit $\hat{b}$, if $\hat{b}=b$ then
+    $\calB$ outputs $1$, and otherwise it outputs $0$. This completes
+    the description of $\calB$.
+
+    We first claim that 
+    \[
+        \Pr[\calB^{E(k,\cdot)}=1] = \Pr[\ExptCPA_{\Pi}(\calA)=1],
+    \]
+    because in this case $\calB$ exactly simulates the experiment
+    for $\calA$. That is, every oracle query is processed \emph{exactly}
+    as in $\ExptCPA_{\Pi}(\calA)$ (and in particular a random key and bit are
+    chosen, and each query uses a uniform and independent $r$ in addition to
+    following the algorithm). Finally the output bit of $\calB$ is determined
+    in exactly the same way.
+
+    We next claim that
+    \[
+        \Pr[\calB^{f(\cdot)}=1] = \frac{1}{2} - \Col(2^\ell,q)
+    \]
+    where $q$ is the number of oracle queries issued by $\calA$.  Intuitively,
+    with this oracle, $\calB$ is using a ``fresh one-time pad'' to mask every
+    query response \emph{as long the $r$ does not repeat}. To formalize
+    this a little bit,  let $R$ be the event that $\calB$ chooses the
+    same value of $r$ in two different queries. Then $\Pr[R] = \Col(2^\ell,q)$.
+    Writing $\bar{R}$ for ``not $R$'' and using the law of total probability,
+    \begin{align*}
+        \Pr[\calB^{f(\cdot)}=1] 
+        & = \Pr[\calB^{f(\cdot)}=1|R]\Pr[R] 
+             + \Pr[\calB^{f(\cdot)}=1|\bar{R}]\Pr[\bar{R}]  \\
+        & \leq \Pr[R] 
+             + \Pr[\calB^{f(\cdot)}=1|\bar{R}] \\
+        & \leq \Col(2^\ell,q) + \frac{1}{2}. 
+    \end{align*}
+    The first inequality follows because we just omit some factors which are
+    both probabilities and thus at most $1$. In the second inequality,
+    we use $\Pr[R]=\Col(2^\ell,q)$ for the first part. To complete this
+    we need to justify
+    \begin{align*}
+        \Pr[\calB^{\bof(\cdot)}=1|\bar{R}] = \frac{1}{2}. 
+    \end{align*}
+    Actually doing this completely rigorously is tricky. The key observation
+    is that, if $R$ does not happen, that means all of queries are processed
+    with unique values of $r$. Call them $r_1,\ldots,r_q$. Then the $i$-th
+    query is answered with
+    \[
+        (r_i, \bof(r_i)\oplus m_b).
+    \]
+    But, conditioned on $R$ not happening,
+    $\bof(r_1),\bof(r_2),\ldots,\bof(r_q)$ are all uniform and independent
+    random variables on $\bits^\ell$. Thus each query completely masks out
+    the message $m_b$, and hence are independent of $b$. Since every query
+    response is independent of $b$, the adversary $\calA$ produces an output
+    independent of $b$. Thus the probability that $\bhat=b$ is $1/2$, and
+    this is the probability that $\calB$ outputs $1$.
+
+    Finally, the rest is calculation:
+    \begin{align*}
+        \AdvPRF{E}{\calB} 
+        & = |\Pr[\calB^{E(\bK,\cdot)}=1] - \Pr[\calB^{\bof(\cdot)}=1]| \\
+        & \geq  \Pr[\calB^{E(\bK,\cdot)}=1] - \Pr[\calB^{\bof(\cdot)}=1] \\
+        & =  \Pr[\ExptCPA_{\Pi}(\calA)=1] - \Pr[\calB^{\bof(\cdot)}=1] \\
+        & \geq  \Pr[\ExptCPA_{\Pi}(\calA)=1] - \frac{1}{2} - \Col(2^\ell,q).
+    \end{align*}
+    The proof is completed by rearranging the final inequality.
+\end{proof}
+
+\begin{exercise}
+    Define a stateful version of $\Pi$ by having $\Enc(k,m,s)$ output
+    a ciphertext $(s,E(k,s)\oplus m)$ and updated state $s' = s+1$.
+    (The initial state is $s=0^\ell$.) Adapt the proof to this case -- The
+    result should be stronger, without the $\Col(2^\ell,q)$ term!
+\end{exercise}
+
+\end{document}
+
