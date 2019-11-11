@@ -249,10 +249,10 @@ the outcome of one entry does not influence the outcome of any other entry.
 Let $\bof$ be a random function from $\bits^{128}$ to $\bits^{128}$.
 Then the following hold:
     \begin{align*}
-        \Pr[\bof(0^{128}) = 0^{128}] &= \frac{1}{128}, \\
+        \Pr[\bof(0^{128}) = 0^{128}] &= \frac{1}{2^{128}}, \\
         \Pr[\bof(0^{128}) \text{ starts with $0$}] &= \frac{1}{2}, \\
-        \Pr[\bof(0^{128}) = \bof(1^{128})] &= \frac{1}{128}, \\
-        \Pr[\bof(0^{128}) \oplus \bof(1^{128}) = 1^{128}] &= \frac{1}{128}.
+        \Pr[\bof(0^{128}) = \bof(1^{128})] &= \frac{1}{2^{128}}, \\
+        \Pr[\bof(0^{128}) \oplus \bof(1^{128}) = 1^{128}] &= \frac{1}{2^{128}}.
     \end{align*}
     These can be proved rigorously by the independence and uniformity of
     $\bof(0^{128})$ and $\bof(1^{128})$ (or, one could actually count
