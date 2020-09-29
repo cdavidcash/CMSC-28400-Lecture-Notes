@@ -140,7 +140,7 @@
    \framebox{
       \vbox{\vspace{2mm}
     \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
-                        \hfill Autumn 2019} }
+                        \hfill Autumn 2020} }
        \vspace{4mm}
        \hbox to 6.28in { {\Large \hfill #2 \hfill} }
        \vspace{2mm}
@@ -161,20 +161,38 @@
 % --- -----------------------------------------------------------------
 \begin{document}
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{3}{Notes \#3: Perfect Secrecy}
+\lecture{3}{Notes \#2: Perfect Secrecy}
 
-\tableofcontents
+%\tableofcontents
 
-\noindent\hrulefill
-\bigskip
+%\noindent\hrulefill
+%\bigskip
 
 
 These notes cover our first definition of security: \emph{Perfect Secrecy},
-which dates back to the work Shannon in the 1950s.
+which dates back to the work Shannon in the 1950s. The motivation for this
+approach to security is to (hopefully) escape the attack-then-patch cycle that
+drove classical cipher development. Abstractly, the plan is to give a
+mathematical definition of ``security'' for a cipher, every bit as precise as
+other definitions, and then \emph{prove} that a cipher meets this definition of
+security. 
 
-\section{Ciphers and Perfect Secrecy}
+What guarantees can this plan give us, ultimately? The proof can only tell us
+that attacks violating the security definition are impossible. As we will see
+Several times in this course, real attacks may work without
+violating the definition; They instead violate some underlying assumption about
+how the definition corresponds to reality. (An extreme example could be an
+attacker who steals your laptop and gets your key. Clearly all bets are off,
+even if you had a nice proof.)
 
-First let's recall the definition of a cipher from earlier.
+Below we start with the security definition, and then prove the One-Time-Pad
+achieves this definition. In the next set of notes we'll discuss limitations of
+this definition, and generalize it to something more practical.
+
+\section{How to Evaluate the Security of Ciphers?}
+
+First let's recall the definition of a cipher from the previous notes,
+for use below.
 \begin{definition}
     Let $\keys,\msgs,\ctxts$ be non-empty sets. A function
     \[
@@ -190,21 +208,36 @@ First let's recall the definition of a cipher from earlier.
     \]
     by letting $\dec(K,\cdot)$ be the inverse of $\enc(K,\cdot)$ for
     each $K\in\keys$. (More precisely, $\dec(k,c)$ is only defined when
-    there exits $m\in\msgs$ such that $\enc(k,m)=c$.)
+    there exists $m\in\msgs$ such that $\enc(k,m)=c$.)
 \end{definition}
 
-Suppose $E$ is a cipher. What does it mean for $E$ to be secure? We could come
-up with list of attacks that it should resist, or we could ask more abstractly
-that ``no one should be able to recover an encrypted message'', or even ``no
-one should be able to recover any part of an encrypted message''.
+Suppose $E$ is a cipher. What does it mean for $E$ to be ``secure''? We could come
+up with list of attacks that it should resist. We could say that $E$ should
+resist single-character frequency analysis, or bigram frequency analysis, or
+more and more clever attacks as we learn about them.  Or, we could ask
+more abstractly that ``no one should be able to recover an encrypted message'',
+or even ``no one should be able to recover any part of an encrypted message'',
+though as a cipher designer it would be hard to interpret such a goal. Someone
+could convince us that we hadn't achieved those goals by presenting an attack,
+but how could someone possibly convince us that they \emph{had} achieved the
+such goals? 
 
-The approach to answering this question taken next subsection is to give
+The approach to answering this question taken in the next subsection is to give
 a mathematical definition of security which compresses a long list of
-security properties into one simple requirement.
+security properties into one simple requirement. If one deems the
+definition suitable for an application, then the proof is enough to convince
+you that a cipher ``is secure.''
+
+Before we dive in, it is worth noting that the approach of enumerating possible
+attacks is fundamental to modern cryptography. As we will see later, we can't
+give definitions and proofs for everything. But our philosophy will be to use
+definitions and proofs as a tool to help drive our cipher design and limit
+security risk.
 
 \subsection{The Definition of Perfect Secrecy}
 
-Here's the definition:
+Let's just lay the definition out and then discuss it, first at a purely
+syntactic level, then at an intuitive level.
 \begin{definition}Let $\enc : \keys\times\msgs \to \ctxts$ be a cipher and
     $\bK$ be a uniform random variable on $\keys$.  We say that $\enc$ is
     \emph{perfectly secret} if for all $m_1,m_2\in\msgs$, and $c\in\ctxts$,
@@ -229,9 +262,10 @@ for security, because it means an attacker looking at the ciphertext gets
     any ciphertext will work.)
 \end{exercise}
 
-
+We can try to understand this definition by giving an equivalent version.
 The following definition is somewhat more complicated technically, but may
-be more clear. It is equivalent to perfectly secrecy.
+be more clear. It is equivalent to perfectly secrecy, in the sense that
+any cipher $E$ that is perfectly secret meets this definition, and vice versa.
 \begin{definition} 
     Let $\enc : \keys\times\msgs \to \ctxts$ be a cipher and $\bK$ be a uniform
     random variable on $\keys$.  We say that $\enc$ has \emph{independent
@@ -245,6 +279,12 @@ given an attacker's knowledge). For instance, if an attacker knows you
 sending a payment response to a website, it might know every character of your
 message except your credit card number. In that case $\bM$ could be a fixed
 request but with random digits for the credit card number.
+
+Note also in the definition that $\bC$ is another random variable defined as a
+function of $\bK$ and $\bM$. The probability notes review the underlying
+foundations of what this means mathematically (though, as the notes mention, we
+are operating without explicitly saying what the sample space is, and will
+continue to do so in later definitions).
 
 
 \begin{theorem}
@@ -260,8 +300,10 @@ request but with random digits for the credit card number.
 
 \section{The One-Time Pad is Perfectly Secret}
 
-For each integer $n\geq 1$, define the cipher $\otp_n : \bits^n\to\bits^n \to
-\bits^n$ by
+We now carry out the second step in our plan: Constructing a cipher and proving
+that it is perfectly secret. We'll use the last of our historical ciphers, the
+one-time pad.  Concretely, for each integer $n\geq 1$, define a cipher
+$\otp_n : \bits^n\times\bits^n \to \bits^n$ by
 \[
     \otp_n(k,m) = k \oplus m.
 \]
@@ -269,21 +311,28 @@ These ciphers are perfectly secret, as we now prove.
 \begin{theorem}
     For every integer $n\geq 1$, the cipher $\otp_n$ is perfectly secret.
 \end{theorem}
-\begin{proof} We use original definition, so we have to show that for every
+\begin{proof} We use the original definition, so we have to show that for every
     $m_0,m_1\in\bits^n$ and $c\in\bits^n$,
     \[
         \Pr[\enc(\bK,m_0) = c] = \Pr[\enc(\bK,m_1) = c],
     \]
     where $\bK$ is uniform on $\bits^n$.  We will do even better, and show that
-    for every $m\in\bits^n$, $\Pr[\enc(\bK,m) = c] = 2^{-n}$, which will
-    imply what we need. This follows because
+    for every $m\in\bits^n$ and $c\in\bits^n$,
+    \[
+        \Pr[\enc(\bK,m) = c] = 2^{-n}, 
+    \]
+        which will imply what we need (if the probabilities are all $2^{-n}$ no
+        matter what $m$ and $c$ are, then certainly the probabilities above are
+        equal). This follows because
     \[
         \Pr[\enc(\bK,m) = c] = \Pr[\bK\oplus m=c] = \Pr[\bK=c\oplus m] = 2^{-n}.
     \]
     The first two equalities hold because $\enc(\bK,m)=c$, $\bK\oplus m = c$,
-    and $\bK=c\oplus m$ are all the same event (one happens if and only if the
-    others happen). The last equality holds because $\bK$ is uniform and
-    $c\oplus m$ is just a fixed element of $\bits^n$.
+    and $\bK=c\oplus m$ are all the \emph{same event} (one happens if and only
+    if the others happen; it looks like simple manipulation of the equations,
+    but it is formally justified by them representing the same event). The last
+    equality holds because $\bK$ is uniform and $c\oplus m$ is just a fixed
+    element of $\bits^n$.
 \end{proof}
 As short as it is, this proof might be tricky if you are not used to
 manipulating random variables. It is worth referring back to the probability
@@ -308,6 +357,7 @@ crib-dragging are effective.
 \end{exercise}
 
 
+\iffalse
 \section{Perfectly Secret Ciphers Must Have $|\keys| \geq |\msgs|$}
 
 The $n$-bit one-time pad has key as long as the messages, which is inconvenient
@@ -388,5 +438,7 @@ unavoidable when one insists of having a perfectly secret cipher.
     \end{itemize}
     This shows the probabilities are not equal and completes the proof.
 \end{proof}
+\fi
 \end{document}
+
 
