@@ -345,9 +345,9 @@ must also hold.
     \begin{itemize}
         \item $\Pr[\Omega] = 1$
         \item For disjoint events $E,F\subseteq \Omega$, 
-            $\Pr[E\cup F] = \Pr[E] \cup \Pr[F]$.
+            $\Pr[E\cup F] = \Pr[E] + \Pr[F]$.
         \item For any two events $E,F\subseteq \Omega$, 
-            $\Pr[E\cup F] = \Pr[E] \cup \Pr[F] - \Pr[E\cap F]$.
+            $\Pr[E\cup F] = \Pr[E] + \Pr[F] - \Pr[E\cap F]$.
         \item For any two events $E,F\subseteq \Omega$, if $E\subseteq F$
             then $\Pr[E] \leq \Pr[F]$.
         \item For an event $E$, let $E^c = \Omega \setminus E$ be the
@@ -390,19 +390,35 @@ We'll use the following facts later on in the course.
 Probability starts to get really interesting when you introduction
 \emph{conditioning}. This brief introduction probably won't be enough
 to give you full intuition for conditional probability, so I recommend
-reading up in \cite{?} if you feel rusty.
+reading up, say, in Prof. Kurtz's notes you feel rusty (\url{http://cmsc-27100.cs.uchicago.edu/2018-winter/Lectures/14/}).
+
 
 \begin{definition}
     Let $(\Omega,\Pr)$ be a probability space 
-    and let $E,F$ be events with $\Pr[F] \neq 0$. We define
+    and let $E,F\subseteq \Omega$ be events with $\Pr[F] \neq 0$. We define
     the \emph{conditional probability of $E$ given $F$} to be
     \[
         \Pr[E|F] = \frac{\Pr[E\cap F]}{\Pr[F]}.
     \]
 \end{definition}
 
+The notion of \emph{independence} is tightly connected to conditional
+probability.
+\begin{definition}
+    Let $(\Omega,\Pr)$ be a probability space 
+    and let $E,F\subseteq \Omega$ be events.
+    We say that $E$ and $F$ are \emph{independent} if
+    \[
+        \Pr[E \cap F] = \Pr[E] \Pr[F].
+    \]
+\end{definition}
+Note that if $E$ and $F$ are independent and $\Pr[F] \neq 0$, then
+$\Pr[E|F] = \Pr[E]$.
 
-One application, which will become clear later, is the following.
+
+
+One application of conditional probably which will be useful later, is the
+following.
 \begin{fact}[Lazy Cryptographer's Law of Total Probability]
     Let $(\Omega,\Pr)$ be a probability space and let $E,F$ be events. Then
     \[
@@ -442,7 +458,7 @@ treat it as an exercise to understand the proof.
     with non-zero probability. Show that the function $\Pr_F:2^\Omega\to[0,1]$,
     defined by $\Pr_F[E] = \Pr[E|F]$ is a probability measure. If $p$
     is the distribution that induces $\Pr$, what distribution induces
-    $\Pr_E$?
+    $\Pr_F$?
 \end{exercise}
 
 
@@ -514,8 +530,8 @@ compactly, via the following notation.
         \Pr[X=i] = \Pr[\{w\in\Omega\ : \ X(w)=i\}].
     \]
     Note that $\Pr,X$ are still functions; Prior to this definition,
-    the right-hand side of the equation would not make sense.
-    The left-hand side, however,  did already make sense: $\Pr$ is a function
+    the left-hand side of the equation would not make sense.
+    The right-hand side, however,  did already make sense: $\Pr$ is a function
     that takes as input subsets of $\Omega$, and $\{w\in\Omega\ : \ X(w)=i\}$
     is such a set.
 \end{notation}
