@@ -240,7 +240,7 @@ Let's just lay the definition out and then discuss it, first at a purely
 syntactic level, then at an intuitive level.
 \begin{definition}Let $\enc : \keys\times\msgs \to \ctxts$ be a cipher and
     $\bK$ be a uniform random variable on $\keys$.  We say that $\enc$ is
-    \emph{perfectly secret} if for all $m_1,m_2\in\msgs$, and $c\in\ctxts$,
+    \emph{perfectly secret} if for all $m_0,m_1\in\msgs$, and $c\in\ctxts$,
     \[
         \Pr[\enc(\bK,m_0) = c] = \Pr[\enc(\bK,m_1) = c].
     \]
