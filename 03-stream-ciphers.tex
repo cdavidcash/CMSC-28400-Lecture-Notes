@@ -462,7 +462,7 @@ as we now prove.
     $G:\bits^n\to\bits^\ell$ be a function. Then there exists
     $\calD:\bits^\ell\in\bits$ such that
     \[
-        \AdvPRG{G}{\calD} \geq \frac{2^\ell}{2^n} \geq \frac{1}{2}.
+        \AdvPRG{G}{\calD} \geq 1- \frac{2^n}{2^\ell} \geq \frac{1}{2}.
     \]
 \end{theorem}
 \begin{proof}
@@ -492,7 +492,15 @@ as we now prove.
     because $\calD(\bU)=1$ is equivalent to $\bU\in\Img\ G$, which happens
     with probability $|\Img\ G|/2^\ell$. By our observation on the size
     $\Img\ G$, this probability is at most $\frac{2^n}{2^\ell}$. Finally,
-    since $n<\ell$, $2^n/2^\ell \leq 1/2$.
+    plug these in to get
+    \begin{align*}
+        \AdvPRG{G}{\calD} & =  
+        |\Pr[\calD(G(\bK))=1] - \Pr[\calD(\bU)=1]| \\
+        & \geq 
+        \Pr[\calD(G(\bK))=1] - \Pr[\calD(\bU)=1] \\
+        & \geq 
+         1 - \frac{2^n}{2^\ell} \geq 1 - \frac{1}{2} = \frac{1}{2}.
+    \end{align*}
 \end{proof}
 
 \begin{exercise}
