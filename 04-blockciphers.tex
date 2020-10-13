@@ -150,7 +150,7 @@
    \framebox{
       \vbox{\vspace{2mm}
     \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
-                        \hfill Autumn 2019} }
+                        \hfill Autumn 2020} }
        \vspace{4mm}
        \hbox to 6.28in { {\Large \hfill #2 \hfill} }
        \vspace{2mm}
@@ -171,16 +171,11 @@
 % --- -----------------------------------------------------------------
 \begin{document}
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{5}{Notes \#5: Block Ciphers}
+\lecture{4}{Notes \#4: Block Ciphers}
 
-\tableofcontents
-
-\noindent\hrulefill
-\bigskip
-
-Along with stream ciphers, block ciphers are a very widely-deployed type
-of algorithm used for encryption and other cryptographic purposes. These
-notes cover some basic definitions of
+Along with stream ciphers, \emph{block ciphers} are a very widely-deployed type
+of algorithm used for encryption and other cryptographic purposes. These notes
+cover the basic notion of a block ciphers and some interesting attacks.
 
 \section{Introduction to Block Ciphers}
 
@@ -210,7 +205,7 @@ decryption.
     The replacement for DES is a family of three blockciphers, often called
     AES128, AES192, and AES256, which have a common block length of $128$
     and key lengths of $128, 192$, and $256$ respectively. The $128$
-    bit version is mostly commonly used. Later we'll refer back to this
+    bit version is the most commonly used. Later we'll refer back to this
     as simply \emph{the} AES blockcipher, with the notation
     \[
         \aes:\bits^{128}\times\bits^{128}\to\bits^{128}.
@@ -230,7 +225,7 @@ library: \url{https://catalog.lib.uchicago.edu/vufind/Record/8899690}.
 
 What does it mean for a block cipher $E:\keys\times\msgs\to\ctxts$ to be
 \emph{secure}? Or, \emph{not secure}? For a stream cipher
-$G:\bits^n\to\bits^\ell$ we arrived at the notation pseudorandom generators and
+$G:\bits^n\to\bits^\ell$ we arrived at the notion of pseudorandom generators and
 distinguishing advantage, which intuitive qualified the $G$ to be used in place
 of a one-time pad. For a block cipher however this definition does not fit;
 It's not even clear what we should give an adversary.
@@ -251,7 +246,7 @@ This is called a \emph{known-ciphertext message recovery attack}, so called
 because the adversary knows the ciphertexts and is targeting the input message
 blocks.
 
-An even more basic requirement is that the \emph{key $k$ be difficult} to
+An even more basic requirement is that the \emph{key $k$} be difficult to
 recover from the blocks $c_1,c_2,\ldots$; call this \emph{known-ciphertext key
 recover attack}. If an adversary can recover $k$ then it can certainly recover
 $m_1,m_2,\ldots$, but it is possible in principle that it finds a shortcut to
@@ -305,16 +300,16 @@ For run time, we are mostly concerned with the number of iterations of the
 ``For'' loop, which is $|\keys|=2^n$ for a block cipher with $n$-bit keys.  The
 DES block cipher only has $2^{56}$ keys, which is not very large by modern
 standards, and today even a modestly-equipped adversary can execute this
-algorithm quickly (hours or minutes depending on their computer). Against AES
+algorithm quickly (hours or minutes depending on their computer). Against AES,
 the runtime is $2^{128}$, which is generally considered totally infeasible.
 
 \section{Double Encryption}
 
 DES was retired because of its small key length and block length, but many
-systems and protocols were deployed with DES baked into them. Instead of
-completely rebuilding the systems that used DES to convert them to a block
-cipher with larger parameters like AES, many opted to use \emph{triple
-encryption} where they ran DES three times instead of two. 
+systems and protocols were deployed with DES baked into them (ATMs are a famous
+example). Instead of completely rebuilding the systems that used DES to convert
+them to a block cipher with larger parameters like AES, many opted to use
+\emph{triple encryption} where they ran DES three times instead of two. 
 
 In this section we investigate their interesting decision to encrypt three
 times rather than two. Here are the options considered, which we denote
@@ -363,17 +358,39 @@ $\twodes$ is no better than single $\des$! We are looking into this because
 it is an elegant method, and also because it highlights the subtleties of
 security.
 
-The attack is called \emph{meet-in-the-middle}, and works as follows.  In this
-algorithm, for convenience we use two arrays $L,R$ indexed by $56$-bit strings.
-Note that the loop variables $i,j$ below are such strings, and hence can
-be used to index positions in $L$ and $R$.
+The attack is called \emph{meet-in-the-middle}, and we give it shortly.  This
+algorithm crucially uses a \emph{hash table} with some assumed properties; We
+won't get into exactly how the table is implemented, because it's pretty
+standard and would involve quite a bit of detail that is not our focus.
+We will just assume the table $H$ gives us the following capabilities:
+\begin{itemize}
+    \item Given any bit strings $x$ and $v$, we can associate $v$ with
+        $x$ in constant time. We write this as
+        $H[x] \gets v$.
+    \item Given a bit string $x$, we can look up the string associated with
+        $x$, or detect that none exists, in constant time.  We write $H[x]$ for
+        the string associated with $x$; if there is none, we express this by
+        saying $H[x] = \bot$.
+\end{itemize}
+Intuitively, $H$ is like an array, except we can use strings as indexes rather
+than numbers in some range. If you've used Python dictionaries, they provide
+essentially this interface.
+
+Now for the meet-in-the-middle attack:
 \begin{tabbing}123\=123\=123\=\kill
     \> \textsc{Input}: Examples $(m_1,c_1),(m_2,c_2),\ldots,(m_t,c_t)$ where
     $c_i=\twodes(k_1\|k_2,m_i)$\\
     \> \textsc{Output}: A key $\hat{k}_1\|\hat{k}_2\in\bits^{112}$\\
-    \> For $\hat{k}\in\bits^{56}$:\ $L[\hat{k}] \gets (\des(\hat{k},m_1), \ldots, \des(\hat{k},m_t))$\\
-    \> For $\hat{k}\in\bits^{56}$:\ $R[\hat{k}] \gets (\des^{-1}(\hat{k},c_1), \ldots, \des^{-1}(\hat{k},c_t))$\\
-    \> Output any $(\hat{k}_1,\hat{k}_2)\in\bits^{56}\times\bits^{56}$ such that $L[\hat{k}_1]=R[\hat{k}_2]$.
+    \> Initialize a hash table $H$\\
+    \> For $\hat{k}_1\in\bits^{56}$:\\
+    \> \> $x \gets \des(\hat{k}_1,m_1)\concat \cdots \concat \des(\hat{k}_1,m_t)$\\
+    \> \> $H[x] \gets \hat{k}_1$\\
+    \> For $\hat{k}_2\in\bits^{56}$:\\
+    \> \> $x' \gets \des^{-1}(\hat{k}_2,c_1)\concat 
+           \cdots\cdots \des^{-1}(\hat{k}_2,c_t)$\\
+    \> \> If $H[x'] \neq \bot$:\\
+    \> \> \> $k'_1 \gets H[x']$; $k'_2 \gets \hat{k}_2$\\
+    \> \> \> Output $k'_1\concat k'_2$
 \end{tabbing}
 What's going on in this algorithm? It is based on the following observation:
 For the correct key $k_1\|k_2$, it holds that
