@@ -240,7 +240,7 @@ applications of block ciphers will drive their security requirements.
 
 For now we'll point out some informal requirements. If we plan to encrypted
 blocks with $E$, then it in almost any imaginable scenario we would want it to
-be hard to recover the blocks we are encrypting.  In a bit more detail, suppose
+be hard to recovery the blocks we are encrypting.  In a bit more detail, suppose
 we are using a key $k\in\bits^n$ and sending $c_i = E(k,m_i)$ for several
 blocks $m_1,m_2,\ldots\in\bits^\ell$. If an adversary captures
 $c_1,c_2,\ldots$, we might ask that it be hard to recover $m_1,m_2,\ldots$.
@@ -250,7 +250,7 @@ blocks.
 
 An even more basic requirement is that the \emph{key $k$} be difficult to
 recover from the blocks $c_1,c_2,\ldots$; call this \emph{known-ciphertext key
-recover attack}. If an adversary can recover $k$ then it can certainly recover
+recovery attack}. If an adversary can recover $k$ then it can certainly recover
 $m_1,m_2,\ldots$, but it is possible in principle that it finds a shortcut to
 recover the message blocks without recovering the $k$; This means security
 against known-ciphertext \emph{key}-recovery attacks is \emph{weaker} than
