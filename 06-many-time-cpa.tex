@@ -326,9 +326,8 @@ Now for the definition.
 \begin{definition}
     Let $\Pi = (\Enc,\Dec)$ be a randomized encryption scheme with key-space
     $\keys$, message-space $\msgs\subseteq\bits^*$, randomness-space $\rands$,
-    and ciphertext-space $\ctxts$.  We assume that the message-space $\msgs$ is
-    a set of bit strings, i.e.  $\msgs\subseteq\bits^*$.  Let $\calA$ be an
-    algorithm. Define algorithm $\ExptCPA_\Pi(\calA)$ as
+    and ciphertext-space $\ctxts$.  Let $\calA$ be an algorithm. Define
+    algorithm $\ExptCPA_\Pi(\calA)$ as
     \begin{center}
     \begin{tabular}{c}
         \begin{minipage}{2in}\begin{tabbing}
@@ -348,7 +347,7 @@ Now for the definition.
         \end{tabbing}\end{minipage}
     \end{tabular}
     \end{center}
-    Define the \emph{CPA advantage of $\calA$ against $\Pi$} as
+    We define the \emph{CPA advantage of $\calA$ against $\Pi$} to be
     \[
         \AdvCPA{\Pi}{\calA} =
         \left|\Pr[\ExptCPA_\Pi(\calA) = 1] - \frac{1}{2}\right|.
@@ -393,12 +392,12 @@ good CPA security.
 
         \begin{tabbing}
             123\=123\=\kill
-            \> Query $\calO(m,m)$. Call the response $c_1$\\
-            \> Query $\calO(m,m')$. Call the response $c_2$\\
+            \> Query $\calO(m,m)$ and call the response $c_1$\\
+            \> Query $\calO(m,m')$ and call the response $c_2$\\
             \> If $c_1 = c_2$ output $0$, Else output $1$.
         \end{tabbing}
 
-    We claim that $\Pr[\ExptCPA_\Pi(\calA) = 1]$. This is equivalent
+    We claim that $\Pr[\ExptCPA_\Pi(\calA) = 1]=1$. This is equivalent
     to saying that $\calA$ always outputs the correct bit $\hatb=b$.
     This follows by the assumption that $\Enc$ is deterministic:
     if $b=0$, then $c_1$ and $c_2$ are both $\Enc(k,m)$ and $\calA$
@@ -409,8 +408,9 @@ good CPA security.
 \end{proof}
 
 \begin{exercise}
-    Check the above proof and pinpoint where we used the fact that
-    $m$ and $m'$ have the same length.
+    Check the above proof and pinpoint where we used the fact that $m$ and $m'$
+    have the same length, and where we used the fact that they distinct. What
+    happens if we relax either of these conditions?
 \end{exercise}
 
 Notice how the adversary above was described: It's defined to work with
@@ -449,7 +449,19 @@ probabilities.
 
 \end{exercise}
 
-
+Those exercises only gave us some examples of encryption schemes with bad
+CPA security.   The following exercise guides our search for good constructions
+by showing that we cannot achieve
+\emph{perfect} CPA security against \emph{all} adversaries.
+The proof is technical
+\begin{exercise}[Harder, optional]
+    Let $\Pi$ be a randomized encryption scheme.  Show there exists an
+    adversary $\calA$ (not necessarily efficient)
+    such that $\AdvCPA{\Pi}{\calA} > 0$.
+\end{exercise}
+Construction encryption schemes with good CPA security is
+usually done from block ciphers in practice, and that is the subject
+of the next set of notes. 
 
 
 \end{document}
