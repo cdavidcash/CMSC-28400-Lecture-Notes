@@ -1,0 +1,456 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amsthm}
+
+\usepackage{amsthm,amsmath,amsfonts,amssymb,amstext,enumitem}
+\usepackage{latexsym,ifthen,url,rotating,graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning,fit}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+
+
+
+% --- -----------------------------------------------------------------
+% --- Document-specific definitions.
+% --- -----------------------------------------------------------------
+\lstset{
+    columns=fixed,
+    literate={—}{{---}}1 {…}{{...}}1
+}
+
+\newcommand{\todo}[1]{{\color{red}[TODO:{#1}]}}
+
+\newtheorem{problem}{Problem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{exercise}{Exercise}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}{Claim}
+\newtheorem{example}{Example}
+
+\newcommand{\getsr}
+  {{\:\stackrel{\raisebox{-2pt}{${\scriptscriptstyle \hspace{0.2em}\$}$}}
+   {\leftarrow}\:}}
+\newcommand{\points}[1]{\textbf{({#1} pts)}}
+
+\newcommand{\fn}{\footnotesize}
+\newcommand{\Colon}{\ : \ }
+\newcommand{\st}{\mathsf{state}}
+\newcommand{\msgs}{\mathcal{M}}
+\newcommand{\ctxts}{\mathcal{C}}
+\newcommand{\keys}{\mathcal{K}}
+\newcommand{\rands}{\mathcal{R}}
+\newcommand{\states}{\mathcal{S}}
+\newcommand{\kg}{\mathcal{K}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\MAC}{\mathrm{MAC}}
+\newcommand{\RMAC}{\mathrm{RMAC}}
+
+\newcommand{\pk}{pk}
+\newcommand{\sk}{sk}
+
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\AES}{\mathsf{AES}}
+
+\newcommand{\algorithm}[1]{\textbf{Alg} {#1}}
+
+\newcommand{\calO}{\mathcal{O}}
+
+\newcommand{\dlog}{\mathrm{dlog}}
+
+\newcommand{\Adv}{\mathbf{Adv}}
+\newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
+\newcommand{\AdvCPA}[2]{\Adv^{\mathrm{cpa}}_{#1}({#2})}
+\newcommand{\AdvCCA}[2]{\Adv^{\mathrm{cca}}_{#1}({#2})}
+\newcommand{\AdvKR}[2]{\Adv^{\mathrm{kr}}_{#1}({#2})}
+\newcommand{\AdvCKR}[2]{\Adv^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\AdvRMR}[2]{\Adv^{\mathrm{rmr}}_{#1}({#2})}
+\newcommand{\AdvCR}[2]{\Adv^{\mathrm{cr}}_{#1}({#2})}
+\newcommand{\AdvUFCMA}[2]{\Adv^{\textrm{uf{-}cma}}_{#1}({#2})}
+\newcommand{\AdvDL}[2]{\Adv^{\mathrm{dl}}_{#1}({#2})}
+
+\newcommand{\Exp}{\mathbf{Exp}}
+\newcommand{\ExpOW}[1]{\Exp^{\mathrm{ow}}({#1})}
+\newcommand{\ExpCKR}[2]{\Exp^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\ExpRMR}[2]{\Exp^{\mathrm{rmr}}_{#1}({#2})}
+
+\newcommand{\concat}{{\,\|\,}}
+\newcommand{\xor}{\oplus}
+\newcommand{\bits}{\{0,1\}}
+
+\newcommand{\tcolh}{T^{\mathrm{col}}_h}
+\newcommand{\tcolH}{T^{\mathrm{col}}_{H^2}}
+\newcommand{\Hcomb}{H^{1\|2}}
+\newcommand{\Hxor}{H^{1\oplus2}}
+
+\newcommand{\EXP}{\textrm{EXP}}
+\newcommand{\MODEXP}{\textrm{MOD{-}EXP}}
+\newcommand{\ADD}{\textrm{ADD}}
+\newcommand{\MULTIMODEXP}{\textrm{MULTI{-}MOD{-}EXP}}
+\newcommand{\MUL}{\textrm{MUL}}
+\newcommand{\MOD}{\textrm{MOD}}
+
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bC}{\mathbf{C}}
+
+\newcommand{\rvrange}{\mathcal{R}}
+\newcommand{\rspace}{\mathcal{C}}
+
+\newcommand{\hatalpha}{\hat{\alpha}}
+\newcommand{\hatb}{\hat{b}}
+
+\newcommand{\barm}{\overline{m}}
+
+\newcommand{\otp}{\mathrm{OTP}}
+\newcommand{\des}{\mathrm{DES}}
+\newcommand{\twodes}{\mathrm{2DES}}
+\newcommand{\threedes}{\mathrm{3DES}}
+\newcommand{\threedestwo}{\mathrm{3DES2}}
+\newcommand{\aes}{\mathrm{AES}}
+\newcommand{\pad}{\mathsf{pad}}
+\newcommand{\unpad}{\mathsf{unpad}}
+
+
+\newcommand{\Img}{\mathrm{Im}}
+
+\newcommand{\Expt}{\mathbf{Expt}}
+\newcommand{\ExptOTCPA}{\mathbf{Expt}^{\mathrm{ot\mbox{-}cpa}}}
+\newcommand{\ExptOTCPAone}{\mathbf{Expt}^{\mathrm{ot\mbox{-}cpa\mbox{-}1}}}
+\newcommand{\ExptOTCPAzero}{\mathbf{Expt}^{\mathrm{ot\mbox{-}cpa\mbox{-}0}}}
+\newcommand{\AdvOTCPA}[2]{\Adv^{\mathrm{ot\mbox{-}cpa}}_{#1}({#2})}
+\newcommand{\ExptCPAone}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}1}}}
+\newcommand{\ExptCPAzero}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}0}}}
+
+\newcommand{\ExptCPA}{\mathbf{Expt}^{\mathrm{cpa}}}
+\newcommand{\ExptCCA}{\mathbf{Expt}^{\mathrm{cca}}}
+\newcommand{\LR}{\mathrm{LR}}
+
+
+
+\newcommand{\Piotp}{\Pi_\mathrm{otp}}
+\newcommand{\Encotp}{\Enc_\mathrm{otp}}
+\newcommand{\Decotp}{\Dec_\mathrm{otp}}
+\newcommand{\bhat}{\hat{b}}
+% --- -----------------------------------------------------------------
+% --- Lecture notes formatting macros
+% --- -----------------------------------------------------------------
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+%\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theexercise}{\thelecnum.\arabic{exercise}}
+\renewcommand{\theexample}{\thelecnum.\arabic{example}}
+\renewcommand{\thedefinition}{\thelecnum.\arabic{definition}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thefact}{\thelecnum.\arabic{fact}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[2]{
+   %\pagestyle{myheadings}
+   %\thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
+                        \hfill Autumn 2020} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill #2 \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Instructor: David Cash} \hfill }
+      \vspace{2mm}}
+   }
+   \end{center}
+   %\markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+
+
+
+
+% --- -----------------------------------------------------------------
+% --- The document starts here.
+% --- -----------------------------------------------------------------
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{6}{Notes \#6: Randomized Encryption and Chosen-Plaintext Security}
+
+Recall that at the beginning of Notes \#3 we identified three crucial
+weaknesses of the OTP: Long keys, one-time security, and malleability.
+PRGs allowed us to address the first issue, and in these notes we begin
+with the second.
+
+
+\section{Many-Time Security and Randomized Encryption}
+
+The OTP and psuedo-OTP are \emph{ciphers}, which means they are functions
+satisfying a certain property we defined in the very first set of notes.
+Implicit in the definition of a cipher is that encryption is ``deterministic,''
+meaning that if one encrypts the same message with the same key multiple times,
+then the same ciphertext will be emitted each time. A closer look at these
+ciphers reveals that their security behavior when encrypting multiple messages
+is even more concerning. For instance, suppose we use the OTP to encrypted a
+message $m_1$, producing a ciphertext $c_1$. Later, say we want to encrypt
+message $m_2$ that is exactly $m_1$, but with its first bit flipped.  Using the
+same key, we would produce a ciphertext $c_2$ that is equal to $c_1$, except
+with its first bit flipped! 
+
+Should this property concern us, as cryptographers? Security always depends on
+the application, and the OTP has its place. But here is an example of the sort
+of thinking that suggests we should consider stronger security: Suppose we
+encrypt a super-secret number $m$ using the OTP, which is the number of widgets
+sold so far this year. Each day we add to $m$ the number of sales, and encrypt
+the number again, producing a new ciphertext. Now consider the point of view of
+an adversary: It will see a sequence of ciphertexts, and be able to detect
+which bits have been changed each time. This will tell the adversary a lot
+about how our day-to-day sales, even though everything is encrypted, and each
+ciphertext is (in some sense) ``unbreakable'' on its own.
+
+This issue played a role in some classical ciphers, like the homophonic cipher
+you broke in Project 1. Recall that this wasn't really a cipher, since the
+encryption process was not really a function but a recipe of sorts which could
+produce different ciphertexts when run on the same input twice. Another example
+is the famous Enigma cipher used in the mid 20th century, notably by the
+Germans in World War II. That cipher explicitly instructed senders to pick a
+random ``message key'' to \emph{randomize} ciphertexts.
+
+Basically all commonly-used modern encryption is designed to avoid these
+problems when encrypting multiple messages with the same key. (The ones that
+aren't are explicitly marked as good for one-time use only.) Because of the
+deterministic nature of a cipher $E$, we need a new definition that allows for
+randomization. The following allows for this, and is called an \emph{encryption
+scheme}. The name is just a convention, but it is pretty standard. Intuitively,
+a randomized encryption is like a cipher, except the encryption direction takes
+an extra input that can be used to randomized the process. Decryption still
+have to recover the message, but doesn't to recover that extra input.
+\begin{definition}
+    A pair of functions $\Pi=(\Enc,\Dec)$,
+    \begin{align*}
+        \Enc  : \keys\times\msgs\times\rands  \to  \ctxts 
+    \end{align*}
+    and
+    \begin{align*}
+        \Dec : \keys\times\ctxts \to \msgs,  
+    \end{align*}
+    is called a \emph{randomized encryption scheme with key-space $\keys$,
+    message-space $\msgs$, randomness-space $\rands$, and ciphertext-space
+    $\ctxts$} if for every $k\in\keys$, $m\in\msgs$, $r\in\rands$, and
+    $c\in\ctxts$
+    \begin{align*}
+        \Enc(k,m,r)=c \quad \implies \quad \Dec(k,c)=m.
+    \end{align*}
+\end{definition}
+The intended usage is for someone to pick $r\in\rands$ and then run
+$c\gets\Enc(k,m,r)$. An interesting point is that decryption must work with $k$
+and $c$ \emph{only}. In particular, the value $r$ chosen by the sender is not
+assumed to be available for decryption unless it is communicated in $c$; Of
+course one can always put $r$ there, but doing so may have implications for
+security.
+
+The OTP and pseudo-OTP do not really fit this definition (if $\rands$ is a
+trivial set or something they can be formally viewed this way, but that is not
+the spirit of the definition). Intuitively, it's not even clear syntactically
+how to mix in randomness into these ciphers. At the end of these notes we'll
+begin looking at how randomness might be used, but with a block cipher.
+
+\section{Chosen-Plaintext Security of Randomized Encryption}
+
+We next formalize a security goal for randomized encryption schemes. The idea
+is to require that an adversary cannot learn anything non-trivial about
+(several) encrypted messages. It should not, in particular, be able to detect
+if the same message was encrypted multiple times or not. We'd also like our
+encryption scheme to securely encrypt any type of messages selected by an
+arbitrary underlying protocol (e.g. HTTP), and not rely on messages avoiding
+any pathologies.
+
+More interestingly is that we want our encryption to remain secure \emph{even
+when an adversary can influence what we encrypt}. Here is a modern example
+where an adversary has this type of power: Suppose we are encrypting traffic
+between a front-end web server and a backend database holding user account
+information. Anyone on the internet can create a free account, and upon account
+creation, the username $u$ and password $p$ are encrypted by the webserver and
+sent to the database. Now suppose the link between these machines is visible to
+an adversary. This adversary\footnote{This adversary may really be multiple
+coordinating people or machines, but we consider it to \emph{one} adversary.}
+can create accounts just like anyone else! Thus it can choose $u$ and $p$ as it
+likes, and then observe the resulting ciphertext. Moreover, it can do this many
+times, perhaps thousands.
+
+More subtle versions of this problem can arise as well. Sometimes adversaries
+will know we're encrypting information from a network protocol. By interfering
+with our connection, it may be possible for the adversary to induce us to
+encrypt predictable error messages.
+
+With that motivation, we give a definition that should hold up those types
+of attacks: The solution is to make a definition where the adversary gets
+to pick the messages, sort of like in one-time CPA, but now for many
+messages. Formally, this definition uses the concept of an \emph{oracle}.
+You can think about oracles intuitively as ``subroutines'' that an
+algorithm can call. When $\calA$ is an oracle algorithm and $O_1$ is a
+function, we write $\calA^{O_1}$ for $\calA$ connected to the oracle
+(subroutine) $O_1$. If $O_2$ is another oracle, we write $\calA^{O_2}$ for
+$\calA$ connected to $O_2$, and so on.  A key point in this formalism is that
+$\calA$ can only observe the input/output behavior of its oracle, and \emph{not
+the code implementing the oracle}.  So if $O_1$ and $O_2$ are the same
+function, then $\calA^{O_1}$ and $\calA^{O_2}$ will behave exactly the same. 
+
+Now for the definition.
+\begin{definition}
+    Let $\Pi = (\Enc,\Dec)$ be a randomized encryption scheme with key-space
+    $\keys$, message-space $\msgs\subseteq\bits^*$, randomness-space $\rands$,
+    and ciphertext-space $\ctxts$.  We assume that the message-space $\msgs$ is
+    a set of bit strings, i.e.  $\msgs\subseteq\bits^*$.  Let $\calA$ be an
+    algorithm. Define algorithm $\ExptCPA_\Pi(\calA)$ as
+    \begin{center}
+    \begin{tabular}{c}
+        \begin{minipage}{2in}\begin{tabbing}
+            123\=123\=\kill
+            \underline{\algorithm{$\ExptCPA_\Pi(\calA)$}} \\[2pt]
+            \fn01 \> Pick $k\getsr \keys, b\getsr \bits$\\
+            \fn02 \> Run $\calA^{\LR_{k,b}(\cdot,\cdot)}$, where the oracle
+            is given below. Eventually $\calA$ halts with output $\hatb$\\
+            \fn03\> If $\hatb = b$: Output 1\\
+            \fn06 \> Else: Output 0\\
+            \\
+            \underline{Oracle $\LR_{k,b}(m_0,m_1)$} \\
+            \> If $m_0,m_1$ are not the same length: Return $\bot$\\
+            \> Pick $r \getsr \rands$\\
+            \> Compute $c \gets \Enc(k,m_b,r)$\\
+            \> Return $c$.
+        \end{tabbing}\end{minipage}
+    \end{tabular}
+    \end{center}
+    Define the \emph{CPA advantage of $\calA$ against $\Pi$} as
+    \[
+        \AdvCPA{\Pi}{\calA} =
+        \left|\Pr[\ExptCPA_\Pi(\calA) = 1] - \frac{1}{2}\right|.
+    \]
+\end{definition}
+This definition has a lot in common with the one-time CPA definition. The
+adversary is picking left/right messages $m_0,m_1$ like in that definition,
+except now it is given as many shots as it likes (subject to any limitations on
+its runtime, since each query costs at least one basic operation). Note that
+each query is answered by picking a fresh, independent value $r$ to be used
+for encryption. Also, every call to the oracle uses the same values of
+$k$ and $b$. That is, the same key is used, and whether the left or right
+message is encrypted is determined across all queries, not per-query (so either
+\emph{every} query is answered by encrypting the left message, or \emph{every}
+query is answered by encrypting the right message).
+
+In practice we are concerned with adversaries $\calA$ with a similar level of
+resources to those we considered before. For example, we might hope for
+security against an adversary running time $2^{128}$ and issuing $2^{128}$
+queries, achieving advantage $2^{-128}$. As before, the maximum advantage
+is $1/2$, and anything remotely large (like $2^{-50}$) is considered to be
+a complete break.
+
+\bigskip
+
+The next claim shows that deterministic encryption schemes cannot have
+good CPA security.
+\begin{claim}
+    Suppose $\Pi=(\Enc,\Dec)$ is an encryption scheme with
+    $\keys,\msgs,\rands$, where $\msgs\subseteq\bits^*$ contains at least two 
+    equal-length messages. Assume
+    $\Enc$ is deterministic (i.e. it does not use its input from $\rands$).
+    Then there exits an adversary $\calA$ making two queries such that
+    \[
+        \AdvCPA{\Pi}{\calA} = 1/2.
+    \]
+\end{claim}
+\begin{proof}
+    Let $m,m'\in\msgs$ be distinct messages of the same length. The adversary
+    $\calA$ works as follows: Given access to an oracle $\calO(\cdot,\cdot)$,
+    do the following:
+
+        \begin{tabbing}
+            123\=123\=\kill
+            \> Query $\calO(m,m)$. Call the response $c_1$\\
+            \> Query $\calO(m,m')$. Call the response $c_2$\\
+            \> If $c_1 = c_2$ output $0$, Else output $1$.
+        \end{tabbing}
+
+    We claim that $\Pr[\ExptCPA_\Pi(\calA) = 1]$. This is equivalent
+    to saying that $\calA$ always outputs the correct bit $\hatb=b$.
+    This follows by the assumption that $\Enc$ is deterministic:
+    if $b=0$, then $c_1$ and $c_2$ are both $\Enc(k,m)$ and $\calA$
+    outputs $\hatb=0$. If $b=1$ then $c_1 =\Enc(k,m)$ and $c_2 =\Enc(k,m')$.
+    But then $c_1$ and $c_2$ cannot be equal, because decryption
+    must be correct. Thus $\calA$ will output $\hatb=1$ in this case,
+    completely the proof.
+\end{proof}
+
+\begin{exercise}
+    Check the above proof and pinpoint where we used the fact that
+    $m$ and $m'$ have the same length.
+\end{exercise}
+
+Notice how the adversary above was described: It's defined to work with
+\emph{any} oracle $\calO$ that fits the correct syntax (i.e. accepting two
+messages). We have to describe $\calA$ in this way because it cannot ``see''
+what oracle its interacting with. But when it comes time to analyzing $\calA$,
+we actually instantiate $\calO$ with a particular function and calculate
+probabilities.
+
+\begin{exercise}
+    Let $\Pi$ be the OTP cipher, viewed as an encryption scheme with
+    deterministic encryption scheme. Describe a simple adversary $\calA$
+    that never inputs the same message to its oracle more than once and yet
+    $\AdvCPA{\Pi}{\calA} = 1/2$. Note the above adversary inputs $m$
+    more than once (in fact three times) to its oracle, so that adversary
+    does not count.
+\end{exercise}
+
+\begin{exercise}
+    Define $\Enc:\keys\times\msgs\times\rands\to\ctxts$, where 
+    $\keys=\msgs=\rands=\bits^\ell$ and $\ctxts = \bits^{2\ell}$, 
+    as
+    \[
+        \Enc(k,m,r) = (r\oplus k, m\oplus r).
+    \]
+    \begin{itemize}
+
+        \item Give an algorithm $\Dec$ that makes $\Pi = (\Enc,\Dec)$ into a
+            randomized encryption scheme (i.e. so that $\Dec$ correctly
+            recovers the message).
+
+        \item Give a simple adversary $\calA$ such that $\AdvCPA{\Pi}{\calA} =
+            1/2$.
+
+    \end{itemize}
+
+\end{exercise}
+
+
+
+
+\end{document}
+
