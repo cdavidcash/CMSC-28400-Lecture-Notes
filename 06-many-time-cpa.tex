@@ -217,7 +217,7 @@ Implicit in the definition of a cipher is that encryption is ``deterministic,''
 meaning that if one encrypts the same message with the same key multiple times,
 then the same ciphertext will be emitted each time. A closer look at these
 ciphers reveals that their security behavior when encrypting multiple messages
-is even more concerning. For instance, suppose we use the OTP to encrypted a
+is even more concerning. For instance, suppose we use the OTP to encrypt a
 message $m_1$, producing a ciphertext $c_1$. Later, say we want to encrypt
 message $m_2$ that is exactly $m_1$, but with its first bit flipped.  Using the
 same key, we would produce a ciphertext $c_2$ that is equal to $c_1$, except
@@ -248,9 +248,10 @@ aren't are explicitly marked as good for one-time use only.) Because of the
 deterministic nature of a cipher $E$, we need a new definition that allows for
 randomization. The following allows for this, and is called an \emph{encryption
 scheme}. The name is just a convention, but it is pretty standard. Intuitively,
-a randomized encryption is like a cipher, except the encryption direction takes
-an extra input that can be used to randomized the process. Decryption still
-have to recover the message, but doesn't to recover that extra input.
+a randomized encryption scheme is like a cipher, except the encryption
+direction takes an extra input that can be used to randomized the process.
+Decryption still have to recover the message, but doesn't to need recover that
+extra input.
 \begin{definition}
     A pair of functions $\Pi=(\Enc,\Dec)$,
     \begin{align*}
@@ -278,8 +279,10 @@ security.
 The OTP and pseudo-OTP do not really fit this definition (if $\rands$ is a
 trivial set or something they can be formally viewed this way, but that is not
 the spirit of the definition). Intuitively, it's not even clear syntactically
-how to mix in randomness into these ciphers. At the end of these notes we'll
-begin looking at how randomness might be used, but with a block cipher.
+how to mix in randomness into these ciphers. In the next set of notes we'll
+begin looking at how randomness might be used effectively, but with a block
+cipher. For these notes will define a new security notion for randomized
+encryption and give a few examples.
 
 \section{Chosen-Plaintext Security of Randomized Encryption}
 
@@ -299,7 +302,7 @@ information. Anyone on the internet can create a free account, and upon account
 creation, the username $u$ and password $p$ are encrypted by the webserver and
 sent to the database. Now suppose the link between these machines is visible to
 an adversary. This adversary\footnote{This adversary may really be multiple
-coordinating people or machines, but we consider it to \emph{one} adversary.}
+coordinating people or machines, but we consider it to be \emph{one} adversary.}
 can create accounts just like anyone else! Thus it can choose $u$ and $p$ as it
 likes, and then observe the resulting ciphertext. Moreover, it can do this many
 times, perhaps thousands.
@@ -380,7 +383,7 @@ good CPA security.
     $\keys,\msgs,\rands$, where $\msgs\subseteq\bits^*$ contains at least two 
     equal-length messages. Assume
     $\Enc$ is deterministic (i.e. it does not use its input from $\rands$).
-    Then there exits an adversary $\calA$ making two queries such that
+    Then there exists an adversary $\calA$ making two queries such that
     \[
         \AdvCPA{\Pi}{\calA} = 1/2.
     \]
@@ -404,7 +407,7 @@ good CPA security.
     outputs $\hatb=0$. If $b=1$ then $c_1 =\Enc(k,m)$ and $c_2 =\Enc(k,m')$.
     But then $c_1$ and $c_2$ cannot be equal, because decryption
     must be correct. Thus $\calA$ will output $\hatb=1$ in this case,
-    completely the proof.
+    completing the proof.
 \end{proof}
 
 \begin{exercise}
@@ -451,9 +454,9 @@ probabilities.
 
 Those exercises only gave us some examples of encryption schemes with bad
 CPA security.   The following exercise guides our search for good constructions
-by showing that we cannot achieve
-\emph{perfect} CPA security against \emph{all} adversaries.
-The proof is technical
+by showing that we cannot achieve \emph{perfect} CPA security against
+\emph{all} adversaries.  The proof is a little technical and omitted, but you
+may like to try proving it.
 \begin{exercise}[Harder, optional]
     Let $\Pi$ be a randomized encryption scheme.  Show there exists an
     adversary $\calA$ (not necessarily efficient)
