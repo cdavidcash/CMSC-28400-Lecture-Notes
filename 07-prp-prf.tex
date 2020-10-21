@@ -2,10 +2,11 @@
 \usepackage{fullpage}
 \usepackage{amsthm}
 
-\usepackage{amsthm,amsmath,amsfonts,amssymb,amstext,enumitem}
+\usepackage{amsthm,amsmath,bm,amsfonts,amssymb,amstext,enumitem}
 \usepackage{latexsym,ifthen,url,rotating,graphicx}
 \usepackage{listings}
 \usepackage{tikz}
+\usepackage{hyperref}
 \usetikzlibrary{arrows,shapes,positioning,fit}
 \usepackage{graphicx}
 \usepackage[font=small,labelfont=bf]{caption}
@@ -68,6 +69,7 @@
 
 \newcommand{\Adv}{\mathbf{Adv}}
 \newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRP}[2]{\Adv^{\mathrm{prp}}_{#1}({#2})}
 \newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
 \newcommand{\AdvCPA}[2]{\Adv^{\mathrm{cpa}}_{#1}({#2})}
 \newcommand{\AdvCCA}[2]{\Adv^{\mathrm{cca}}_{#1}({#2})}
@@ -104,6 +106,7 @@
 
 \newcommand{\bK}{\mathbf{K}}
 \newcommand{\bof}{\mathbf{f}}
+\newcommand{\bop}{\bm{\pi}}
 \newcommand{\bU}{\mathbf{U}}
 \newcommand{\bM}{\mathbf{M}}
 \newcommand{\bC}{\mathbf{C}}
@@ -140,6 +143,7 @@
 \newcommand{\ExptCCA}{\mathbf{Expt}^{\mathrm{cca}}}
 \newcommand{\LR}{\mathrm{LR}}
 \newcommand{\Func}{\mathrm{Func}}
+\newcommand{\Perm}{\mathrm{Perm}}
 
 
 
@@ -206,23 +210,43 @@
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
 \lecture{7}{Notes \#7: Pseudorandom Permutations and Functions}
 
-todo intro
+In these notes we introduce and briefly study the concepts of
+\emph{pseudorandom permutations} and \emph{pseudorandom functions}.  These
+formalize notions of security that one can reasonably believe block ciphers
+like AES achieve. Our plan is to use these notions in the next set of notes to
+formalize statements like ``If AES is a good pseudorandom permutation, then
+encryption scheme $\Pi$ has good (many-time) CPA security.''
 
-\section{Pseudorandom Functions}
+For a preview and some motivation, we plan to analyze the following simple
+randomized encryption scheme $\Pi$, which is a basic version of real
+commonly-used schemes. The relevant sets are
+$\keys=\msgs=\rands=\bits^{128}$,and $\ctxts=\bits^{128}\times\bits^{128}$.
+Encryption is defined by:
+\[
+    \Enc(k,m,r) = (r, \AES(k,r)\oplus m).
+\]
+Intuitively, this encryption scheme is picking $r$ at random, and sending it
+``in the clear'' in the ciphertext. The ``pad'' is $\AES(k,r)$. (Decryption
+recomputes this pad and XORs it off.) The idea is that the sender and receiver
+both know $k$ and can easily compute the pad. But an attacker will know $r$
+(from the ciphertext) but not $k$, and thus cannot evaluate $\AES(k,r)$.  Based
+on the design of $\AES$ and the lack of attacks, it is generally believed the
+pad in this scenario will ``look random'', and intuitively we'll get
+security analogously to how we did with the
+pseudo-OTP. Even better, since $r$ is random each time, we can get
+\emph{many-time} CPA security if all of several such pads look random.  The
+concepts we outline next will give us a foundation for rigorously analyzing
+this situation, similar to how we used PRGs for the pseudo-OTP.
+
+
+\section{Pseudorandom Permutations and Functions}
 
 We now give an abstraction describing a main security goal of block ciphers.
-In this definition we will need the concept of an \emph{oracle} for an
-algorithm.  You can think about oracles intuitively as ``subroutines'' that an
-algorithm can call. When $\calA$ is an oracle algorithm and $O_1$ is a
-function, we write $\calA^{O_1}$ for $\calA$ connected to the oracle
-(subroutine) $O_1$. If $O_2$ is another oracle, we write $\calA^{O_2}$ for
-$\calA$ connected to $O_2$, and so on.  A key point in this formalism is that
-$\calA$ can only observe the input/output behavior of its oracle, and \emph{not
-the code implementing the oracle}.  So if $O_1$ and $O_2$ are the same
-function, then $\calA^{O_1}$ and $\calA^{O_2}$ will behave exactly the same. 
-
-The following definition also needs the concept of a \emph{random function}
-$\bof:\bits^\ell\to\bits^\ell$. You can think of such a random variable
+The following definitions use the concept of a \emph{random function}
+$\bof:\bits^\ell\to\bits^\ell$. Formally, this makes perfect sense: the
+set of all possible functions between those sets is finite, and we mean
+to select one uniformly at random. 
+You can think of such a random variable
 as a table listing an output for every possible input, and such that
 the outputs are all uniformly random and independent. For a concrete
 example with $\ell=3$, we might have $\bof$ represented by the table:
@@ -267,15 +291,134 @@ Then the following hold:
      $f(0^{128})\neq0^{128}$.
 \end{example}
 
+We can also define a \emph{random permutation} $\bop:\bits^\ell\to\bits^\ell$
+similarly: It's just a randomly chosen sample from the set of all possible
+permutations on $\bits^\ell$. We can sample $\bop$ using the table view above,
+except now we must ensure that the values on the right column are all distinct.
+
 \begin{exercise}
-    Let $\Func(\bits^\ell,\bits^\ell)$ be the set of all functions from
-$\bits^\ell$ to $\bits^\ell$. This set has size $2^{\ell2^\ell}$. Using the
-table point of view on functions, or another method, explain this formula.
+    Repeat the above calculations but with $\bof$ replaced by $\bop$, a
+    random permutation.
 \end{exercise}
 
-We can now state the definition, and afterwards interpret it.
+
+\begin{exercise}
+    Let $\Func(\bits^\ell,\bits^\ell)$ be the set of all functions from
+    $\bits^\ell$ to $\bits^\ell$. This set has size $2^{\ell2^\ell}$. Using the
+    table point of view on functions, or another method, explain this formula.
+
+    Similarly, let $\Perm(\bits^\ell)$ be  the set of all permutations on
+    $\bits^\ell$. How large is this set?
+\end{exercise}
+
+\subsection{Psuedorandom Permutation Definition}
+
+We want to formalize a statement like ``$\AES(\bK,\cdot)$ looks like a random
+permutation when $\bK$ is a random key'', and then use such an assumption to
+analyze encryption schemes. For PRGs we were able to do this by asking that no
+distinguisher could effectively tell the PRG output from random.  But how do we
+do this for a block cipher?  A quick attempt might be to give a distinguisher
+the table for either $\AES(\bK,\cdot)$, or the table for a random permutation,
+and ask it to distinguish these cases. But this definition isn't very useful;
+The tables are absolutely gigantic, well beyond what is possible to write down
+using all of the atoms in the universe (we'd need $\log_2|\Perm(\bits^\ell)|$ bits)! So while that definition may make sense
+mathematically, the distinguishers involved wouldn't correspond to real
+attacks.
+
+The definition we give next resolves this problem by only giving the adversary
+\emph{oracle access} to either $\AES(\bK,\cdot)$ or a random permutation. That
+is, the adversary gets input/output access to an oracle computing one those
+functions, and attempts to determine which one it is talking to. It can make
+as many queries as it wants, with whatever inputs it can come up with. The only
+bound comes from the runtime of the adversary.
 \begin{definition}
-    Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ and $\calA$ be an adversary.
+    Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ be a block cipher
+    and $\calA$ be an adversary.
+    Let $\bK$ be uniform on $\bits^n$, and let $\bop$ be a random permutation
+    on $\bits^\ell$.
+    We define the \emph{pseudorandom permutation (PRP) distinguishing advantage
+    of $\calA$ against $E$} to be
+    \[
+        \AdvPRP{E}{\calA} =
+        \left|\Pr[\calA^{E(\bK,\cdot)}=1]-\Pr[\calA^{\bop(\cdot)}=1]\right|.
+    \]
+\end{definition}
+One way to interpret this definition is to look at $E$ as a ``family of
+permutations,''  indexed by the key. Then $E(\bK,\cdot)$ is a random member of
+this family, while $\bop(\cdot)$ is a random permutation from amongst all
+possibilities. Practical block ciphers like AES are designed to look like
+random permutations in this manner, resisting all efficient attempts to
+find patterns in their outputs.
+
+An adversary $\calA$ can be judged according to its runtime, the number of
+queries it issues, and its advantage. We won't distinguish much between runtime
+and queries, but in practice an adversary will usually have far more
+computation time than it does queries, because the queries need to be run by
+the parties under attack. They won't be enabling anything like $2^{80}$ queries,
+but the adversary might have that much computation.  If the advantage of every
+reasonable $\calA$ is small (say $2^{-64}$ or $2^{-128}$,
+depending on the application), we informally say that $E$ is a good PRP. 
+
+In that case we think of $E$ with a random key as ``looking like a
+random permutation,'' and all of the properties of random permutations are thus
+inherited by $E$. So $E(\bK,x)$ and $E(\bK,x')$ ($x\neq x'$) should look like 
+two random distinct strings, even when $x$ and $x'$ differ only by one
+bit. If not, then there would be an adversary with good PRP advantage.
+\begin{example}
+    Suppose $E:\bits^{128}\times\bits^{128}\to\bits^{128}$ satisfies
+    $E(k,0^{128})=0^{128}$ for every $k\in\bits^{128}$. We show that
+    $E$ is not a good PRP. Consider $\calA^\calO$ that queries $0^{128}$
+    to its oracle $\calO$ and calls the response $y$. If $y=0^{128}$
+    then $\calA$ outputs $1$, else $0$. Then
+    \[
+        \Pr[\calA^{E(\bK,\cdot)}=1]=1
+    \]
+    and
+    \[
+        \Pr[\calA^{\bop(\cdot)}=1] = \frac{1}{2^{128}},
+    \]
+    the latter because a random permutation satisfies $\bof(0^{128})=0^{128}$
+    with probability $\frac{1}{2^{128}}$. Thus
+    \[
+        \AdvPRP{E}{\calA} = 1 - \frac{1}{2^{128}},
+    \]
+    which is high. Moreover, $\calA$ only issues one query and performs
+    some trivial computation.
+\end{example}
+Note that we had to define $\calA$ with respect to a generic oracle $\calO$;
+We don't get to say how $\calA$ works with $E(\bK,\cdot)$ and $\bop(\cdot)$
+separately, since $\calA$ only gets to see their input/output behavior.
+More complicated patterns can be found with more clever attacks.
+\begin{exercise}
+ Suppose $E:\bits^{128}\times\bits^{128}\to\bits^{128}$ satisfies
+    $E(k,0^{128})=\overline{E(k,1^{128})}$ (the bar indicates bitwise
+    complement) for every $k\in\bits^{128}$. Similar to the previous
+    example, show that $E$ cannot be a good PRP. What is the advantage
+    of your adversary?
+\end{exercise}
+
+%Finally we address the need for oracles in the definition. It would be simpler
+%to, say, provide a function table (like the one we diagrammed above) to
+%$\calA$, and ask it if the table represents $E(\bK,\cdot)$ or $\bof$.  But this
+%table would gigantic for the sizes we care about: $2^{128}\cdot 128$ bits for
+%$\AES$. But no algorithm with realistic resources could even read its input in
+%that case. We resort to oracles to allow ``selective'' access to parts of
+%the function without paying a huge runtime.
+
+\subsection{Pseudorandom Function Definition}
+
+Above we defined psuedorandom \emph{permutations} because blockciphers 
+themselves compute permutations. As we'll see below, however, we frequently
+actually want something that looks like a random \emph{function} rather
+than a random permutation. The issue is usually that we want to use the
+function's outputs as pads for encryption, but with a permutation these
+pads won't be independent (since they're guaranteed to be distinct).
+
+Thus we give a modified definition. All that is changed is that we
+compare against $\bof$ rather than $\bop$.
+\begin{definition}
+    Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ 
+    and $\calA$ be an adversary.
     Let $\bK$ be uniform on $\bits^n$, and let $\bof$ be a random function
     from $\bits^\ell$ to $\bits^\ell$.
     We define the \emph{pseudorandom function (PRF) distinguishing advantage
@@ -286,48 +429,13 @@ We can now state the definition, and afterwards interpret it.
     \]
 \end{definition}
 
-An adversary $\calA$ can be judged according to its runtime, the number of
-queries it issues, and its advantage. We won't distinguish much between runtime
-and queries, but in practice an adversary will usually have far more
-computation time than it does queries, because the queries need to be run by
-the parties under attack. They won't be enabling anything like $2^{80}$ queries,
-but the adversary might have that much computation.  If the advantage of every
-reasonable $\calA$ is small (say $\frac{1}{2^{64}}$ or $\frac{1}{2^{128}}$,
-depending on the application), we informally say that $E$ is a good PRF. 
-
-In that case we think of $E$ as ``essentially looking like a
-random function,'' and all of the properties of random functions are thus
-inherited by $E$. So $E(\bK,x)$ and $E(\bK,x')$ should look like totally
-random, independent strings, when $x\neq x'$, even when they differ only by one
-bit. If not, then there would be an adversary with good PRF advantage.
-
-\begin{example}
-    Suppose $E:\bits^{128}\times\bits^{128}\to\bits^{128}$ satisfies
-    $E(k,0^{128})=0^{128}$ for every $k\in\bits^{128}$. We show that
-    $E$ is not a good PRF. Consider $\calA^\calO$ that queries $0^{128}$
-    to its oracle $\calO$ and calls the response $y$. If $y=0^{128}$
-    then $\calA$ outputs $1$, else $0$. Then
-    \[
-        \Pr[\calA^{E(\bK,\cdot)}=1]=1
-    \]
-    and
-    \[
-        \Pr[\calA^{\bof(\cdot)}=1] = \frac{1}{2^{128}},
-    \]
-    the latter because a random function satisfies $\bof(0^{128})=0^{128}$
-    with probability $\frac{1}{2^{128}}$. Thus
-    \[
-        \AdvPRF{E}{\calA} = 1 - \frac{1}{2^{128}},
-    \]
-    which is high.
-\end{example}
-Note that we had to define $\calA$ with respect to a generic oracle $\calO$;
-We don't get to say how $\calA$ works with $E(\bK,\cdot)$ and $\bof(\cdot)$
-separately, since $\calA$ only gets to see their input/output behavior.
-More complicated patterns can be found with more clever attacks.
+The same intuition and explanations as with the PRP definition apply here.
+Here's an example to work the definition a bit.
 \begin{example}
     Define $E:\bits^{128}\times\bits^{128}\to\bits^{128}$ by
-    $E(k,x)=k\oplus x$.
+    \[
+       E(k,x)=k\oplus x.
+    \]
     We show that
     $E$ is not a good PRF. Consider $\calA^\calO$ that fixes any
     $x_1\neq x_2\in\bits^{128}$, 
@@ -341,6 +449,7 @@ More complicated patterns can be found with more clever attacks.
     and
     \[
         \Pr[\calA^{\bof(\cdot)}=1] 
+        =
         \Pr[\bof(x_1)\oplus \bof(x_2)=x_1\oplus x_2] = \frac{1}{2^{128}},
     \]
     the latter because a random function satisfies that
@@ -353,24 +462,24 @@ More complicated patterns can be found with more clever attacks.
     which is high. Note that we needed two queries to break this one -- It's
     actually impossible to break it in one query!
 \end{example}
+The previous example highlights a feature of PRFs/PRPs that is important
+to remember: It's not enough for each query alone to be answered randomly.
+We need that the answers to several queries together look random and
+independent.
 
-Finally we address the need for oracles in the definition. It would be simpler
-to, say, provide a function table (like the one we diagrammed above) to
-$\calA$, and ask it if the table represents $E(\bK,\cdot)$ or $\bof$.  But this
-table would gigantic for the sizes we care about: $2^{128}\cdot 128$ bits for
-$\AES$. But no algorithm with realistic resources could even read its input in
-that case. We resort to oracles to allow ``selective'' access to parts of
-the function without paying a huge runtime.
 
-\section{Birthday Attacks}
+\section{PRPs versus PRPs, and Birthday Attacks}
 
-You may have noticed that in the definition of PRF advantage, when
-the oracle is $E(\bK,\cdot)$, then the adversary will never see
-a repeated output for two distinct inputs. But when the oracle
-is $\bof(\cdot)$ then two distinct inputs will produce the same
-output with non-zero probability. This suggests the following adversary, which
-attacks $E:\bits^n\times\bits^k\to\bits^k$ and issues some number $q\leq
-2^{\ell}$ queries: 
+Suppose a block cipher $E$ is a good PRP. Is it necessarily also a good
+\emph{PRF}?  It seems like it should be, at least for not to many queries,
+since intuitively a permutation will look a function, except that it never
+repeats an output.  But let us examine this more closely.
+
+Fix a block cipher $E:\bits^n\times\bits^\ell\to\bits^\ell$. Consider
+the following adversary, which attempts to distinguish $E$ with a random
+key from a random \emph{function}. Intuitively, all the adversary does is
+check for a repeated output or not. It issues $2\leq q\leq 2^{\ell}$ queries,
+for some $q$ we discuss below.
 \begin{center}
     \begin{tabular}{c}
         \begin{minipage}{2in}\begin{tabbing}
@@ -381,7 +490,7 @@ attacks $E:\bits^n\times\bits^k\to\bits^k$ and issues some number $q\leq
             \> \> Let $x_i\in\bits^\ell$ be the $\ell$-bit encoding of $i$\\
             \> \> Query $y_i \gets \calO(x_i)$\\
             \> \> If $y_i \in S$: Output $1$ \\
-            \> \> Add $y_i$ to $S$\\
+            \> \> Else: Add $y_i$ to $S$\\
             \> Output $0$
         \end{tabbing}\end{minipage}
     \end{tabular}
@@ -389,7 +498,7 @@ attacks $E:\bits^n\times\bits^k\to\bits^k$ and issues some number $q\leq
 The set $S$ could be implemented with a hash table or another data structure
 that allows for fast membership testing and fast addition.
 
-Let's find the advantage of this adversary. First it is simple to show
+Let's find the PRF advantage $\AdvPRF{E}{\calA}$ of this adversary. First it is simple to show
 that
 \[
     \Pr[\calA^{E(\bK,\cdot)}=1]=0
@@ -404,19 +513,19 @@ On the other hand,
 is less obvious to calculate. We will need the following interesting
 and well-known ``birthday bound''.
 
-\begin{theorem}
+\begin{theorem}[Birthday Bound]
     Let $N,q\geq 1$ be integers, and let $\Col(N,q)$ be the probability that
     there is a repeated value (a \emph{collision}) in $q$ independent uniform
     samples from a set of size $N$. Then
     \[
-        1 - \exp{-q(q-1)/2N} \leq \Col(N,q) \leq 0.5\frac{q(q-1)}{N}.
+        1 - e^{-0.5 q(q-1)/N} \leq \Col(N,q) \leq 0.5\frac{q(q-1)}{N}.
     \]
     If $q\leq \sqrt{2N}$, then this implies
     \[
         0.3 \frac{q(q-1)}{N} \leq \Col(N,q) \leq 0.5\frac{q(q-1)}{N}.
     \]
 \end{theorem}
-Above $\exp(x)=e^x$ is the usual exponential function from calculus.
+Above $e\approx 2.72$ is the base of the natural logarithm from calculus.
 \begin{exercise}
     Prove the upper bound of the theorem via a union bound.
 \end{exercise}
@@ -459,6 +568,42 @@ These attacks are called ``birthday attacks,'' and are avoidable if one
 insists on working with a block cipher (as we do). Thus we'll aim for
 a block cipher to have \emph{only} this defect, and remain a good PRF
 until about $2^{\ell/2}$ queries are issued.
+
+\subsection{The PRF/PRP Switching Lemma}
+
+In our analysis next time we will argue that it is okay to ``switch''
+a random permutation to a random function, in the sense that an adversary
+who does not issue to many queries cannot tell the difference:
+\begin{lemma}
+    Fix integer $\ell\geq 1$, and let $\bof:\bits^\ell\to\bits^\ell$ and
+    $\bop:\bits^\ell\to\bits^\ell$ be a uniformly random function and
+    permutation respectively. Then for all adversaries $\calA$ that issue
+    exactly $q$ distinct queries to an oracle,
+    \[
+        \left|\Pr[\calA^{\bop(\cdot)}=1]
+        -
+        \Pr[\calA^{\bof(\cdot)}=1]
+        \right| \leq 0.5\frac{q(q-1)}{2^\ell}.
+    \]
+\end{lemma}
+Here is the intuition for this lemma: Conditioned on the event that all $q$ of
+the answers from $\bof$ are distinct, the adversary has no advantage in telling
+the oracles apart, since in this conditional space they are both outputting a
+sequence of $q$ random distinct samples from $\bits^\ell$.  Thus the only way
+the adversary can tell the difference is to look for a repeated output, but
+this happens with probability $\Col(q,2^\ell)$,  which is bounded by the
+theorem above.
+
+The proof is actually quite a bit more subtle than you may think, and for about
+20 years researchers in cryptography overlooked a basic error in the original
+statement. The theorem is actually harder to prove if we allow $\calA$ to issue
+\emph{at most} $q$ queries rather than \emph{exactly} $q$ queries.  You don't
+need to worry about this for CMSC 28400, but if you're curious you can read
+about the issue in Section 2 of
+\href{https://eprint.iacr.org/2004/331.pdf}{this research paper} (\url{https://eprint.iacr.org/2004/331.pdf}), and
+subsequently quizzing the TAs about it. The paper uses rather different
+notation from us, but refers to exactly the same concepts of PRFs and PRPs.
+
 
 
 \end{document}
