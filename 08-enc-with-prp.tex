@@ -68,6 +68,7 @@
 
 \newcommand{\Adv}{\mathbf{Adv}}
 \newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRP}[2]{\Adv^{\mathrm{prp}}_{#1}({#2})}
 \newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
 \newcommand{\AdvCPA}[2]{\Adv^{\mathrm{cpa}}_{#1}({#2})}
 \newcommand{\AdvCCA}[2]{\Adv^{\mathrm{cca}}_{#1}({#2})}
@@ -140,6 +141,7 @@
 \newcommand{\ExptCCA}{\mathbf{Expt}^{\mathrm{cca}}}
 \newcommand{\LR}{\mathrm{LR}}
 \newcommand{\Func}{\mathrm{Func}}
+\newcommand{\Perm}{\mathrm{Perm}}
 
 
 
@@ -204,93 +206,85 @@
 % --- -----------------------------------------------------------------
 \begin{document}
 %\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
-\lecture{8}{Notes \#8: Randomized Encryption with a PRP}
+\lecture{8}{Notes \#8: Randomized Encryption with a Block Cipher}
 
-todo intro
-
-
-
-\section{Symmetric Encryption with the AES Block Cipher}
-
-In this section we give some of the standard constructions of encryption
-from a block cipher. For the rest of the section, we fix the block cipher
+In these notes we look at some practical CPA-secure constructions of
+randomized encryption using a block cipher.  For applications like encrypting
+internet traffic, the AES block cipher is ubiquitous, so we present all of
+these constructions with AES, though they work just as well with other block
+ciphers.  Concretely, for the rest of these notes, we use AES-128, which is
+formally the block cipher
 \[
     \aes :\bits^{128} \times \bits^{128} \to \bits^{128}.
 \]
+Using $\aes$, the goal is build encryption schemes that
+\begin{itemize}
+    \item Achieve good (many-time) CPA security, assuming AES has good
+        PRP security, and
+    \item Can encrypt long messages (possibly terabytes), rather than
+        just $16$ bytes.
+\end{itemize}
+We'll just present the constructions in a natural order of how complex the
+ideas involved are. Such constructions are called \emph{modes of operation} for
+AES. They are typically given three-letter names, like ECB, CTR, CBC, OFB, CFB,
+etc, and when used with AES specifically you'll
+see names like ``AES-ECB'' or ``AES in ECB mode.''
 
-\subsection{Padding}
+\section{Warm-up: A Basic Construction}
 
-All of the encryption modes in this section will have message $\msgs$ equal to
-arbitrary-length byte strings (that is, bit strings with length a multiple of
-$8$).  The AES block cipher we want to work with, however, only accepts exactly
-16 bytes as input. Thus at a few points we will need to ``pad'' a string to be
-a multiple of 16 bytes long.
+%Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ be a block cipher. 
+Let's start with a warm-up. This construction will be sound, in that
+it has a security theorem (reduction) backing it up, but it can only
+encrypt a single block, and as such is not really a mode of operation. 
+However it can begin to help us understand
+the design rationale behind the later constructions.
 
-At first padding seems easy (``just add zeros'') but in order to be useful
-the padding must be reversible, meaning that someone should be able to remove
-the padding and arrive at the same message.
-
-To that end, we define a function $\pad$ that accepts a byte-string of
-arbitrary length. On input $m$, $\pad(m)$ will add between $1$ and $16$ bytes
-(note that it \emph{always} adds at least one byte). To decide how many,
-$\pad(m)$ looks at the number of bytes needed to make $m$ a multiple of $16$
-bytes long; call this number $N$. If $m$ is already a multiple of 16 bytes
-long, it sets $N=16$. Finally $\pad(m)$ adds $N$ bytes with hex value $0xN$.
-So if one byte needs to be added, $\pad$ appends $0x01$. If two bytes are
-added, then it appends $0x0202$, etc.
-
-\begin{example}
-    Suppose $m$ is the byte string 
+Let's define a randomized encryption encryption scheme $\Pi=(\Enc,\Dec)$ with
+$\keys=\bits^{128}$, $\msgs=\rands=\bits^{128}$, and
+$\ctxts=\bits^{128}\times\bits^{128}$ by
     \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01},
+        \Enc(k,m,r)=(r,\aes(k,r)\oplus m)
     \]
-    where the pairs of digits represent bytes in hex.
-    This string is $8$ bytes long, so $8$ bytes needed to be added.
-    The output of $\pad(m)$ is
+and $\Dec(k,(r,c)) = \aes(k,r)\oplus c$.
+
+I defined this construction and sketched the idea for the at the beginning of
+Video 4c. Intuitively, we are using $\aes(k,r)$ as the one-time pad to hide
+$m$. Since we choose a new $r$ each time, we're getting a new pad with each
+encryption (at least intuitively; we might get unlucky and repeat an $r$).
+Since $\aes$ is a good PRP, these pads should (pretty much) look random.
+
+We can prove the following theorem about $\Pi$. It's actually pretty technical
+to prove, so we defer it to next week. 
+\begin{theorem}
+%Let $E:\bits^n\times\bits^\ell\to\bits^\ell$ be a block cipher. 
+%Define a randomized encryption encryption scheme 
+    %$\Pi=(\Enc,\Dec)$ with $\keys=\bits^n$, 
+    %$\msgs=\rands=\bits^\ell$, and 
+    %$\ctxts=\bits^\ell\times\bits^\ell$ by
+    %\[
+        %\Enc(k,m,r)=(r,E(k,r)\oplus m)
+    %\]
+    %and $\Dec(k,(r,c)) = E(k,r)\oplus c$. 
+    Let $\Pi$ be the randomized encryption scheme just defined.
+    Then for every $\calA$ issuing $q$
+    queries to its oracle there exists a $\calB$, running in about the same
+    time as $\calA$, such that
     \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 08\ 08\ 08\ 08\ 08\ 08\ 08\ 08}
+        \AdvCPA{\Pi}{\calA} \leq \AdvPRP{\aes}{\calB} + 2\cdot \Col(2^\ell,q).
     \]
-\end{example}
-
-You can check that it is possible to remove the padding from a string
-unambiguously. We'll call that function $\unpad$. We note that some strings
-have invalid padding, meaning that $\pad$ would never output them.
-\begin{example}
-    Consider the byte string
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 05}.
-    \]
-    This string is not properly padded, because it only ends with $4$ bytes
-    with hex value $0x05$ at the end.
-
-    On the other hand, the byte string
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 01}.
-    \]
-    \emph{is} properly padded, because it ends in one $0x01$ byte.
-
-    This is somewhat more subtle than it looks at first. The string
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 01\ 01\ 01\ 01}.
-    \]
-    is also properly padded, because it ends in one $0x01$ byte (the other
-    $0x01$ bytes are actually message bytes).
-\end{example}
-This is called PKCS\#7 padding; You can read about it here, amongst other
-places:
-\url{https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS#5_and_PKCS#7}.
+\end{theorem}
 
 
-\subsection{Construction\#1: AES-ECB}
+\section{Mode of Operation \#1: AES-ECB}
 
-Our first construction isn't randomized or stateful; It's just a plain cipher.
-Nonetheless, it is sometimes used, often with catastrophic consequences.
+Our first mode of operation isn't randomized; It's just a plain cipher.
+Nonetheless, it is implemented in many popular libraries and thus is sometimes
+used by unsuspecting developers, sometimes with catastrophic consequences.
+If you see it in software, it's almost a red flag.
 
-This mode is called \emph{ECB}, for ``electronic codebook.'' 
-The key-space is $\keys=\bits^{128}$ and the message-space $\msgs$ is
-consists of bytestrings of arbitrary length.
-The code is
-as follows:
+This mode is called \emph{ECB}, for ``electronic codebook.'' The key-space is
+$\keys=\bits^{128}$ and the message-space $\msgs$ is consists of byte-strings
+of arbitrary length.  The code is as follows:
 \begin{center}
     \begin{tabular}{c|c}
         \begin{minipage}{2in}\begin{tabbing}
@@ -327,14 +321,180 @@ is not a valid padding (say, if an adversary were to feed in a block that
 is mistakenly decrypted). In that case, we should allow $\Dec$ to output
 an error symbol instead of $m$.
 
-\subsection{Construction\#2: AES-CBC with Random IV}
+How secure is AES-ECB? It's deterministic, and we proved that deterministic
+constructions never have good many-time CPA security. But even worse, it's
+not one-time-CPA-secure either! The following theorem is easy to prove
+by adapting earlier ideas (try encrypting messages that repeat the same
+block versus those that don't).
+
+\begin{claim}
+    Let $\Pi_{\mathrm{ecb}}$ be the encryption scheme defined above.
+    Then there exists a simple adversary $\calA$ such that
+    \[
+        \AdvOTCPA{\Pi_{\mathrm{ecb}}}{\calA} = 1/2.
+    \]
+\end{claim}
+
+\section{Mode of Operation \#2: AES-CTR with Random IV}
+
+The next construction is randomized. It is called \emph{CTR mode}, or
+\emph{counter mode}.  The idea is essentially to use AES to produce
+a stream cipher, and then encrypt as with the pseudo-OTP, but with
+some randomization in order to avoid reusing pads.
+%Compared to CBC with a random IV, it has the advantage of
+%avoiding padding and thus never encounters mal-formed messages, and produces a
+%ciphertext exactly 16 bytes longer than its input message.
+
+This construction has $\keys=\rands=\bits^{128}$ and accepts any byte string as
+a message. It will do addition with elements of $\bits^{128}$ by treating them
+as integers modulo $2^{128}$ (in practice, the wrapping should essentially
+never happen though).  For now, you can assume that the modular addition can be
+done efficiently, even though $2^{128}$ is a huge number. In practice,
+processors natively implement such arithmetic, so it is very fast.
+
+The code for the AES-CTR mode of operation is as follows:
+\begin{center}
+    \begin{tabular}{c}
+        \begin{minipage}{2in}\begin{tabbing}
+            123\=123\=\kill
+            \underline{\algorithm{$\Enc(k,m,r)$}} \\[2pt]
+            \> Parse $m[1]\|\cdots\|m[t]\gets m \quad $ 
+                    \emph{//$m[t]$ may be less than $16$ bytes}\\
+            \> $c[0] \gets r$ \\
+            \> For $i=1,\ldots,t-1$: \\
+            \> \> $c[i] \gets \aes(k,r+i\bmod 2^{128})\oplus m[i]$\\
+            \> $c[t] \gets \aes(k,r+t\bmod 2^{128})\oplus m[t] \quad$ 
+                    \emph{//truncate pad if needed}\\
+            \> $c \gets c[0]\|\cdots\|c[t]$\\
+            \> Output $c$
+        \end{tabbing}\end{minipage}
+    \end{tabular}
+\end{center}
+The ciphertext $c$ has length equal to the length of $m$ plus 16 bytes.
+The comment about truncation means that we can only use enough bytes of
+$\aes(k,r+t\bmod 2^{128})$ to equal the length of $m[t]$. Intuitively,
+CTR mode is simply computing a ``pseudo one-time pad'' by computing
+$\aes(k,r+1),\aes(k,r+2),\ldots$ and taking as many bits as needed 
+to XOR against the message.  Since $r$ is changing each time, it is
+unlikely that we'll reuse the pad. PRP security of AES ensures that
+\emph{all} of the pads used look random.
+
+Decryption does what you'd expect. Note that it needs the value of
+$c[0]$ to know where to start computing the pad.
+\begin{center}
+    \begin{tabular}{c}
+        \begin{minipage}{2in}\begin{tabbing}
+            123\=123\=\kill
+            \underline{\algorithm{$\Dec(k,c)$}} \\[2pt]
+            \> Parse $c[0]\|\cdots\|c[t]\gets c \quad $ 
+                    \emph{//$c[t]$ may be less than $16$ bytes}\\
+            \> $r \gets c[0]$ \\
+            \> For $i=1,\ldots,t-1$: \\
+            \> \> $m[i] \gets \aes(k,r+i\bmod 2^{128})\oplus c[i]$\\
+            \> $m[t] \gets \aes(k,r+t\bmod 2^{128})\oplus c[t] \quad$ 
+                    \emph{//truncate pad if needed}\\
+            \> $m \gets m[0]\|\cdots\|m[t]$\\
+            \> Output $m$
+        \end{tabbing}\end{minipage}
+    \end{tabular}
+\end{center}
+This is a good encryption scheme, but it may fail if the value of $r$ repeats
+-- Then it would effectively reuse a one-time pad. The following theorem,
+which we will not prove, quantifies this. Notice that it depends on $\sigma$,
+the total number of message \emph{blocks}, rather than the number of queries.
+Intuitively, this is because security will fail if any \emph{blocks} of a pad
+overlap and get reused. In particular, security can still fail even if the
+same $r$ is not used, but instead two near-by values of $r$ happen to be chosen.
+\begin{theorem}
+    Let $\Pi$ be the AES-CTR randomized encryption scheme just defined.  Let
+    $\calA$ be an adversary issuing queries that in total consist of $\sigma$
+    blocks of $16$ bytes to its oracle. Then there exists an adversary $\calB$,
+    running in about the same time as $\calA$, such that
+    \[
+        \AdvCPA{\Pi}{\calA} \leq \AdvPRP{\aes}{\calB} + 2\cdot \Col(2^\ell,\sigma).
+    \]
+\end{theorem}
+
+\section{Mode of Operation \#3: AES-CBC with Random IV}
 
 The next encryption scheme, called \emph{CBC} for ``cipher block chaining with
 a random IV'' is randomized. The term ``IV'' stands for \emph{initialization
-vector},  and refers to the randomness used. The code is as follows:
+vector},  and is just the old name for the randomness used. 
+Before we 
 
+\subsection{Aside: Padding}
+
+The AES block cipher we want to work with, however, only accepts exactly 16
+bytes as input, but there are cases where we would like to handle shorter byte
+strings. Thus at a few points we will need to ``pad'' a string to be a multiple
+of 16 bytes long.  At first padding seems easy (``just add zeros'') but in
+order to be useful, we often need the padding to be reversible, meaning that
+someone should be able to remove the padding and arrive at the same message.
+Simply adding zeros doesn't work, because trailing zeros on the message block
+will be confused with padding zeros.
+
+To that end, there is a standard, widely-used function $\pad$ that accepts a
+byte-string of arbitrary length and outputs a string with length a multiple of
+$16$ (and hence suitable to be cut up and input to AES). On input $m$,
+$\pad(m)$ will add between $1$ and $16$ bytes (note that it \emph{always} adds
+at least one byte). To decide how many bytes to add, $\pad(m)$ looks at the
+number of bytes needed to make $m$ a multiple of $16$ bytes long; call this
+number $N$. If $m$ is already a multiple of 16 bytes long, it sets $N=16$.
+Finally $\pad(m)$ adds $N$ bytes with hex value $0xN$.  So if one byte needs to
+be added, $\pad$ appends $0x01$. If two bytes are added, then it appends
+$0x0202$, etc.
+
+\begin{example}
+    Suppose $m$ is the byte string 
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01},
+    \]
+    where the pairs of digits represent bytes in hex.
+    This string is $8$ bytes long, so $8$ bytes needed to be added.
+    The output of $\pad(m)$ is
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 08\ 08\ 08\ 08\ 08\ 08\ 08\ 08}
+    \]
+\end{example}
+You can check that it is possible to remove the padding from a string
+unambiguously. We'll call that function $\unpad$. We note that some strings
+have invalid padding, meaning that $\pad$ would never output them.
+\begin{example}
+    Consider the byte string
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 05}.
+    \]
+    This string is not properly padded, because it only ends with $4$ bytes
+    with hex value $0x05$ at the end.
+
+    On the other hand, the byte string
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 01}.
+    \]
+    \emph{is} properly padded, because it ends in one $0x01$ byte.
+
+    This is somewhat more subtle than it looks at first. The string
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 01\ 01\ 01\ 01}.
+    \]
+    is also properly padded, because it ends in one $0x01$ byte (the other
+    $0x01$ bytes are actually message bytes).
+\end{example}
+This is called PKCS\#7 padding; You can read about it here, amongst other
+places:
+\url{https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS#5_and_PKCS#7}.
+
+It turns out that this padding function creates quite a bit of headache in
+practice, as we will see in Project 2!
+
+\subsection{AES-CBC Construction}
+
+Here's another widely-used mode of operation, called AES-CBC (with a random
+IV). The name ``CBC'' stands for \emph{cipher-block chaining}, which comes from
+the structure of the mode.
 The key-pace and randomness-space for AES-CBC are $\keys=\rands=\bits^{128}$.
-The message space is any byte string.
+The message space is any byte string. The code is as
+follows (note that we use the $\pad$ function from above):
 \begin{center}
     \begin{tabular}{c|c}
         \begin{minipage}{2in}\begin{tabbing}
@@ -370,147 +530,109 @@ Decryption undoes encryption in a direct way. It parses out the ciphertext
 blocks, and then recovers the $i$\textsuperscript{th} ciphertext block
 by applying $\aes^{-1}$ and XOR-ing with the previous ciphertext block.
 
-What's going on here? CBC is trying to eliminate repeated blocks, and defeat
-frequency analysis. Intuitively, if $r$ is chosen randomly, then it should
-essentially never repeat. But then the first input, $c[0]\oplus\barm[1]$,
-will also essentially never repeat. Then, inductively, we can sort of claim
-the same should hold for all of the ciphertext blocks. That's a long way from
-a sort of proof, but it is the design rationale.
+What's going on here? We no longer have a simple psuedo-OTP-like structure.
+CBC is taking a different approach to hide when message blocks are repeated and
+to defeat frequency analysis. Intuitively, if $r$ is chosen randomly, then it
+should essentially never repeat. But then the first input,
+$c[0]\oplus\barm[1]$, will also essentially never repeat. Then, inductively, we
+can sort of claim the same should hold for all of the ciphertext blocks. That's
+a long way from a sort of proof, but it is the design rationale. The following
+theorem is almost identical to the case for CTR, but is even harder to
+prove.
+\begin{theorem}
+    Let $\Pi$ be the AES-CBC randomized encryption scheme just defined.  Let
+    $\calA$ be an adversary issuing queries that in total consist of $\sigma$
+    blocks of $16$ bytes to its oracle. Then there exists an adversary $\calB$,
+    running in about the same time as $\calA$, such that
+    \[
+        \AdvCPA{\Pi}{\calA} \leq \AdvPRP{\aes}{\calB} + 2\cdot \Col(2^\ell,\sigma).
+    \]
+\end{theorem}
+
 
 Finally we note that CBC decryption may also encounter a malformed string when
-it attempts to unpad. In that case decryption should throw an error.
+it attempts to unpad. In that case decryption should throw an error. As we'll
+see later in Project 2, error handling has been a source of security problems
+for CBC.
 
-\subsection{Construction\#3: AES-CBC with Stateful IV}
-Our next cipher is a stateful variant of CBC. It uses its state as the first
-ciphertext block, and in this particular version, saves the last ciphertext
-block as the new state.
-\begin{center}
-    \begin{tabular}{c}
-        \begin{minipage}{2in}\begin{tabbing}
-            123\=123\=\kill
-            \underline{\algorithm{$\Enc(k,m,s)$}} \\[2pt]
-            \> $\barm \gets \pad(m)$\\
-            \> Parse $\barm[1]\|\cdots\|\barm[t]\gets\barm$ \\
-            \> $c[0] \gets s$ \\
-            \> For $i=1,\ldots,t$: \\
-            \> \> $c[i] \gets \aes(k,c[i-1]\oplus\barm[i])$\\
-            \> $c \gets c[0]\|\cdots\|c[t]$\\
-            \> $s' \gets c[t]$\\
-            \> Output $(c,s')$
-        \end{tabbing}\end{minipage}
-    \end{tabular}
-\end{center}
-Decryption is the same as above and omitted. On the first encryption,
-the state is set to a random element of $\bits^{128}$ just like
-CBC with a random IV. 
+%\subsection{Construction\#3: AES-CBC with Stateful IV}
+%Our next cipher is a stateful variant of CBC. It uses its state as the first
+%ciphertext block, and in this particular version, saves the last ciphertext
+%block as the new state.
+%\begin{center}
+%    \begin{tabular}{c}
+%        \begin{minipage}{2in}\begin{tabbing}
+%            123\=123\=\kill
+%            \underline{\algorithm{$\Enc(k,m,s)$}} \\[2pt]
+%            \> $\barm \gets \pad(m)$\\
+%            \> Parse $\barm[1]\|\cdots\|\barm[t]\gets\barm$ \\
+%            \> $c[0] \gets s$ \\
+%            \> For $i=1,\ldots,t$: \\
+%            \> \> $c[i] \gets \aes(k,c[i-1]\oplus\barm[i])$\\
+%            \> $c \gets c[0]\|\cdots\|c[t]$\\
+%            \> $s' \gets c[t]$\\
+%            \> Output $(c,s')$
+%        \end{tabbing}\end{minipage}
+%    \end{tabular}
+%\end{center}
+%Decryption is the same as above and omitted. On the first encryption,
+%the state is set to a random element of $\bits^{128}$ just like
+%CBC with a random IV. 
+%
+%The vague reasoning above about ciphertext blocks not repeating can be applied
+%here. However, as innocuous as the stateful change may seem, it turns out to be
+%insecure in most settings where it has been deployed! The attraction is that
+%the first ciphertext block $c[0]$ can be omitted when it is already known to
+%the receiver, but the savings comes at a grave cost in security, as we will see.
+%
 
-The vague reasoning above about ciphertext blocks not repeating can be applied
-here. However, as innocuous as the stateful change may seem, it turns out to be
-insecure in most settings where it has been deployed! The attraction is that
-the first ciphertext block $c[0]$ can be omitted when it is already known to
-the receiver, but the savings comes at a grave cost in security, as we will see.
 
-\subsection{Construction\#4: AES-CTR with Random IV}
 
-The next construction is randomized. It is called \emph{CTR mode}, or
-\emph{counter mode}. Compared to CBC with a random IV, it has the advantage of
-avoiding padding and thus never encounters mal-formed messages, and produces a
-ciphertext exactly 16 bytes longer than its input message.
-
-This construction has $\keys=\rands=\bits^{128}$ and accepts any byte string as
-a message. It will do addition with elements of $\bits^{128}$ by treating them
-as integers modulo $2^{128}$ (in practice, the wrapping should essentially
-never happen though).  The code is as follows:
-\begin{center}
-    \begin{tabular}{c}
-        \begin{minipage}{2in}\begin{tabbing}
-            123\=123\=\kill
-            \underline{\algorithm{$\Enc(k,m,r)$}} \\[2pt]
-            \> Parse $m[1]\|\cdots\|m[t]\gets m \quad $ 
-                    \emph{//$m[t]$ may be less than $16$ bytes}\\
-            \> $c[0] \gets r$ \\
-            \> For $i=1,\ldots,t-1$: \\
-            \> \> $c[i] \gets \aes(k,r+i\bmod 2^{128})\oplus m[i]$\\
-            \> $c[t] \gets \aes(k,r+t\bmod 2^{128})\oplus m[t] \quad$ 
-                    \emph{//truncate pad if needed}\\
-            \> $c \gets c[0]\|\cdots\|c[t]$\\
-            \> Output $c$
-        \end{tabbing}\end{minipage}
-    \end{tabular}
-\end{center}
-The comment about truncation means that we can only use enough bytes of
-$\aes(k,r+t\bmod 2^{128})$ to equal the length of $m[t]$. Intuitively,
-CTR mode is simply computing a ``pseudo one-time pad'' by computing
-$\aes(k,r+1),\aes(k,r+2),\ldots$ and taking as many bits as needed 
-to XOR against the message. 
-
-Decryption does what you'd expect. Note that it needs the value of
-$c[0]$ to know where to start computing the pad.
-\begin{center}
-    \begin{tabular}{c}
-        \begin{minipage}{2in}\begin{tabbing}
-            123\=123\=\kill
-            \underline{\algorithm{$\Dec(k,c)$}} \\[2pt]
-            \> Parse $c[0]\|\cdots\|c[t]\gets c \quad $ 
-                    \emph{//$c[t]$ may be less than $16$ bytes}\\
-            \> $r \gets c[0]$ \\
-            \> For $i=1,\ldots,t-1$: \\
-            \> \> $m[i] \gets \aes(k,r+i\bmod 2^{128})\oplus c[i]$\\
-            \> $m[t] \gets \aes(k,r+t\bmod 2^{128})\oplus c[t] \quad$ 
-                    \emph{//truncate pad if needed}\\
-            \> $m \gets m[0]\|\cdots\|m[t]$\\
-            \> Output $m$
-        \end{tabbing}\end{minipage}
-    \end{tabular}
-\end{center}
-This is a good cipher, but it may fail if the value of $r$ repeats -- Then
-it would effectively reuse a one-time pad.
-
-\subsection{Construction\#5: AES-CTR with Stateful IV}
-The final cipher is a variant of CTR that manages state instead of randomness.
-It can be run in practice by setting $s=0$ on the first run.
-\begin{center}
-    \begin{tabular}{c}
-        \begin{minipage}{2in}\begin{tabbing}
-            123\=123\=\kill
-            \underline{\algorithm{$\Enc(k,m,s)$}} \\[2pt]
-            \> Parse $m[1]\|\cdots\|m[t]\gets m \quad $ 
-                    \emph{//$m[t]$ may be less than $16$ bytes}\\
-            \> $c[0] \gets s$ \\
-            \> For $i=1,\ldots,t-1$: \\
-            \> \> $c[i] \gets \aes(k,r+i\bmod 2^{128})\oplus m[i]$\\
-            \> $c[t] \gets \aes(k,r+t\bmod 2^{128})\oplus m[t] \quad$ 
-                    \emph{//truncate pad if needed}\\
-            \> $c \gets c[0]\|\ldots\|c[t]$\\
-            \> $s' \gets s+t$\\
-            \> Output $(c,s')$
-        \end{tabbing}\end{minipage}
-    \end{tabular}
-\end{center}
-Decryption is exactly as in CTR with a randomized IV. This version of CTR
-has the advantage of never repeating a one-time-pad, as it is effectively
-impossible to run the counter until it wraps modulo $2^{128}$.
-
-\begin{exercise}
-    Consider the following encryption algorithm:
-\begin{center}
-    \begin{tabular}{c}
-        \begin{minipage}{2in}\begin{tabbing}
-            123\=123\=\kill
-            \underline{\algorithm{$\Enc(k,m,r)$}} \\[2pt]
-            \> $\barm \gets \pad(m)$\\
-            \> Parse $\barm[1]\|\cdots\|\barm[t]\gets\barm$ \\
-            \> $c[0] \gets r; d[0] \gets r$ \\
-            \> For $i=1,\ldots,t$: \\
-            \> \> $d[i] \gets \aes(k,d[i-1])$\\
-            \> \> $c[i] \gets d[i]\oplus\barm[i]$\\
-            \> $c \gets c[0]\|\ldots\|c[t]$\\
-            \> Output $c$
-        \end{tabbing}\end{minipage}
-    \end{tabular}
-\end{center}
-Find a decryption algorithm for this construction.
-\end{exercise}
+%\subsection{Construction\#5: AES-CTR with Stateful IV}
+%The final cipher is a variant of CTR that manages state instead of randomness.
+%It can be run in practice by setting $s=0$ on the first run.
+%\begin{center}
+%    \begin{tabular}{c}
+%        \begin{minipage}{2in}\begin{tabbing}
+%            123\=123\=\kill
+%            \underline{\algorithm{$\Enc(k,m,s)$}} \\[2pt]
+%            \> Parse $m[1]\|\cdots\|m[t]\gets m \quad $ 
+%                    \emph{//$m[t]$ may be less than $16$ bytes}\\
+%            \> $c[0] \gets s$ \\
+%            \> For $i=1,\ldots,t-1$: \\
+%            \> \> $c[i] \gets \aes(k,r+i\bmod 2^{128})\oplus m[i]$\\
+%            \> $c[t] \gets \aes(k,r+t\bmod 2^{128})\oplus m[t] \quad$ 
+%                    \emph{//truncate pad if needed}\\
+%            \> $c \gets c[0]\|\ldots\|c[t]$\\
+%            \> $s' \gets s+t$\\
+%            \> Output $(c,s')$
+%        \end{tabbing}\end{minipage}
+%    \end{tabular}
+%\end{center}
+%Decryption is exactly as in CTR with a randomized IV. This version of CTR
+%has the advantage of never repeating a one-time-pad, as it is effectively
+%impossible to run the counter until it wraps modulo $2^{128}$.
+%
+%\begin{exercise}
+%    Consider the following encryption algorithm:
+%\begin{center}
+%    \begin{tabular}{c}
+%        \begin{minipage}{2in}\begin{tabbing}
+%            123\=123\=\kill
+%            \underline{\algorithm{$\Enc(k,m,r)$}} \\[2pt]
+%            \> $\barm \gets \pad(m)$\\
+%            \> Parse $\barm[1]\|\cdots\|\barm[t]\gets\barm$ \\
+%            \> $c[0] \gets r; d[0] \gets r$ \\
+%            \> For $i=1,\ldots,t$: \\
+%            \> \> $d[i] \gets \aes(k,d[i-1])$\\
+%            \> \> $c[i] \gets d[i]\oplus\barm[i]$\\
+%            \> $c \gets c[0]\|\ldots\|c[t]$\\
+%            \> Output $c$
+%        \end{tabbing}\end{minipage}
+%    \end{tabular}
+%\end{center}
+%Find a decryption algorithm for this construction.
+%\end{exercise}
 
 \end{document}
 
