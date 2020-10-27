@@ -282,6 +282,74 @@ Nonetheless, it is implemented in many popular libraries and thus is sometimes
 used by unsuspecting developers, sometimes with catastrophic consequences.
 If you see it in software, it's almost a red flag.
 
+\subsection{Aside: Padding}
+
+The AES block cipher we want to work with, however, only accepts exactly 16
+bytes as input, but there are cases where we would like to handle shorter byte
+strings. Thus at a few points we will need to ``pad'' a string to be a multiple
+of 16 bytes long.  At first padding seems easy (``just add zeros'') but in
+order to be useful, we often need the padding to be reversible, meaning that
+someone should be able to remove the padding and arrive at the same message.
+Simply adding zeros doesn't work, because trailing zeros on the message block
+will be confused with padding zeros.
+
+To that end, there is a standard, widely-used function $\pad$ that accepts a
+byte-string of arbitrary length and outputs a string with length a multiple of
+$16$ (and hence suitable to be cut up and input to AES). On input $m$,
+$\pad(m)$ will add between $1$ and $16$ bytes (note that it \emph{always} adds
+at least one byte). To decide how many bytes to add, $\pad(m)$ looks at the
+number of bytes needed to make $m$ a multiple of $16$ bytes long; call this
+number $N$. If $m$ is already a multiple of 16 bytes long, it sets $N=16$.
+Finally $\pad(m)$ adds $N$ bytes with hex value $0xN$.  So if one byte needs to
+be added, $\pad$ appends $0x01$. If two bytes are added, then it appends
+$0x0202$, etc.
+
+\begin{example}
+    Suppose $m$ is the byte string 
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01},
+    \]
+    where the pairs of digits represent bytes in hex.
+    This string is $8$ bytes long, so $8$ bytes needed to be added.
+    The output of $\pad(m)$ is
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 08\ 08\ 08\ 08\ 08\ 08\ 08\ 08}
+    \]
+\end{example}
+You can check that it is possible to remove the padding from a string
+unambiguously. We'll call that function $\unpad$. We note that some strings
+have invalid padding, meaning that $\pad$ would never output them.
+\begin{example}
+    Consider the byte string
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 05}.
+    \]
+    This string is not properly padded, because it only ends with $4$ bytes
+    with hex value $0x05$ at the end.
+
+    On the other hand, the byte string
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 01}.
+    \]
+    \emph{is} properly padded, because it ends in one $0x01$ byte.
+
+    This is somewhat more subtle than it looks at first. The string
+    \[
+        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 01\ 01\ 01\ 01}.
+    \]
+    is also properly padded, because it ends in one $0x01$ byte (the other
+    $0x01$ bytes are actually message bytes).
+\end{example}
+This is called PKCS\#7 padding; You can read about it here, amongst other
+places:
+\url{https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS#5_and_PKCS#7}.
+
+It turns out that this padding function creates quite a bit of headache in
+practice, as we will see in Project 2!
+
+
+\subsection{ECB Mode Details}
+
 This mode is called \emph{ECB}, for ``electronic codebook.'' The key-space is
 $\keys=\bits^{128}$ and the message-space $\msgs$ is consists of byte-strings
 of arbitrary length.  The code is as follows:
@@ -421,71 +489,6 @@ The next encryption scheme, called \emph{CBC} for ``cipher block chaining with
 a random IV'' is randomized. The term ``IV'' stands for \emph{initialization
 vector},  and is just the old name for the randomness used. 
 Before we 
-
-\subsection{Aside: Padding}
-
-The AES block cipher we want to work with, however, only accepts exactly 16
-bytes as input, but there are cases where we would like to handle shorter byte
-strings. Thus at a few points we will need to ``pad'' a string to be a multiple
-of 16 bytes long.  At first padding seems easy (``just add zeros'') but in
-order to be useful, we often need the padding to be reversible, meaning that
-someone should be able to remove the padding and arrive at the same message.
-Simply adding zeros doesn't work, because trailing zeros on the message block
-will be confused with padding zeros.
-
-To that end, there is a standard, widely-used function $\pad$ that accepts a
-byte-string of arbitrary length and outputs a string with length a multiple of
-$16$ (and hence suitable to be cut up and input to AES). On input $m$,
-$\pad(m)$ will add between $1$ and $16$ bytes (note that it \emph{always} adds
-at least one byte). To decide how many bytes to add, $\pad(m)$ looks at the
-number of bytes needed to make $m$ a multiple of $16$ bytes long; call this
-number $N$. If $m$ is already a multiple of 16 bytes long, it sets $N=16$.
-Finally $\pad(m)$ adds $N$ bytes with hex value $0xN$.  So if one byte needs to
-be added, $\pad$ appends $0x01$. If two bytes are added, then it appends
-$0x0202$, etc.
-
-\begin{example}
-    Suppose $m$ is the byte string 
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01},
-    \]
-    where the pairs of digits represent bytes in hex.
-    This string is $8$ bytes long, so $8$ bytes needed to be added.
-    The output of $\pad(m)$ is
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 08\ 08\ 08\ 08\ 08\ 08\ 08\ 08}
-    \]
-\end{example}
-You can check that it is possible to remove the padding from a string
-unambiguously. We'll call that function $\unpad$. We note that some strings
-have invalid padding, meaning that $\pad$ would never output them.
-\begin{example}
-    Consider the byte string
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 05}.
-    \]
-    This string is not properly padded, because it only ends with $4$ bytes
-    with hex value $0x05$ at the end.
-
-    On the other hand, the byte string
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 05\ 05\ 05\ 01}.
-    \]
-    \emph{is} properly padded, because it ends in one $0x01$ byte.
-
-    This is somewhat more subtle than it looks at first. The string
-    \[
-        \mathtt{00\ 00\ 00\ 00\ 01\ 01\ 01\ 01\ 06\ 06\ 06\ 06\ 01\ 01\ 01\ 01}.
-    \]
-    is also properly padded, because it ends in one $0x01$ byte (the other
-    $0x01$ bytes are actually message bytes).
-\end{example}
-This is called PKCS\#7 padding; You can read about it here, amongst other
-places:
-\url{https://en.wikipedia.org/wiki/Padding_(cryptography)#PKCS#5_and_PKCS#7}.
-
-It turns out that this padding function creates quite a bit of headache in
-practice, as we will see in Project 2!
 
 \subsection{AES-CBC Construction}
 
