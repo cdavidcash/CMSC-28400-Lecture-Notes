@@ -459,7 +459,7 @@ definition, so we can measure the security of $F$ as either a MAC or a PRF.
     algorithm. Then there exists an algorithm $\calB$, running about
     the same time as $\calA$, such that
     \[
-        \AdvUF{F}{\calA} \leq \AdvPRF{F}{\calB} + \frac{q_v}{|\tags|},
+        \AdvUF{F}{\calA} \leq \AdvPRF{F}{\calB} + \frac{q_v}{|\tags|-q_v},
     \]
     where $q_v$ is the number of times $\calA$ queries its $\Vrfy$ oracle.
     Moreover, $\calB$ issues the same number of queries as (the sum total number
@@ -511,11 +511,12 @@ definition, so we can measure the security of $F$ as either a MAC or a PRF.
     
     Next we prove that
     \[
-        \Pr[\calB^{\bof(\cdot)}=1] \leq \frac{q_v}{|\tags|}.
+        \Pr[\calB^{\bof(\cdot)}=1] \leq \frac{q_v}{|\tags|-q_v}.
     \]
     By definition, $\calA$ issues $q_v$
     queries to its $\Vrfy$ oracle. For $i=1,\ldots,q_v$, define 
-    $W_i$ to be the event that the $\win$ flag is set to $1$ on the $i$-th
+    $W_i$ to be the event that the $\win$ flag is set to $1$ for the
+    first time on the $i$-th
     query. If $\calB^{\bof(\cdot)}=1$, then definitely one of the $W_i$
     occurs (and vice versa). So we have
     \[
@@ -523,21 +524,24 @@ definition, so we can measure the security of $F$ as either a MAC or a PRF.
         \sum_{i=1}^{q_v}\Pr[W_i].
     \]
     The inequality is just a union bound. We're going to show that $\Pr[W_i]
-    \leq 1/|\tags|$ for all $i$, which will give
+    \leq 1/(|\tags|-q_v)$ for all $i$, which will give
     \[
         \Pr[\calB^{\bof(\cdot)}=1] \leq
-        \sum_{i=1}^{q_v}\Pr[W_i] \leq \frac{q_v}{|\tags|}.
+        \sum_{i=1}^{q_v}\Pr[W_i] \leq \frac{q_v}{|\tags|-q_v}.
     \]
     Finally the theorem is proved by simply rearranging the terms in the
     definition of the advantages of $\calA$ and $\calB$.
 
-    Now for the bound $\Pr[W_i]\leq 1/|\tags|$. This holds because the only way
+    Now for the bound $\Pr[W_i]\leq 1/(|\tags|-q_v)$. This holds because the only way
     for $W_i$ to happen is for $\calA$ to ``predict'' the value $\bof(\hatm)$
-    without previously querying $\hatm$. But when $\hatm$ is not queried, the
-    value $\bof(\hatm)$ is independent of the view of $\calB$ so far, and hence
-    its guess $\hatt$ is independent of $\bof(\hatm)$. But $\bof(\hatm)$ is
-    uniform, so the probability that $\hatt = \bof(\hatm)$ is $1/|\tags|$, as
-    desired.
+    without previously querying $\hatm$. All it knows about $\bof(\hatm)$ is
+    what it could learn from the verification oracle, and this is limited
+    to at most $q_v$ previous incorrect attempts.
+    And since $\hatm$ was not queried, the
+    value $\bof(\hatm)$ is independent on the set of $|\tags|-q_v$ remaining
+    possibilities. Hence
+    the on the $i$-th query is correct with
+    probability $1/(|\tags|-q_v)$, as desired.
 \end{proof}
 One can intuitively sum up the relation between MAC and PRF security as: MAC
 security is about \emph{predicting} a function $F$ on a point before you query
