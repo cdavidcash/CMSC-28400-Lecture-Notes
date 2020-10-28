@@ -481,9 +481,10 @@ definition, so we can measure the security of $F$ as either a MAC or a PRF.
             \> \> \> Query $t \gets \calO(m)$. \\
             \> \> \> Return $t$ to $\calA$.\\
             \> \> On query for $\Vrfy_k(\hatm,\hatt)$:\\
-            \> \> \> If $\hatm\in S$: Return $0$\\
             \> \> \> Query $t \gets \calO(\hatm)$. \\
-            \> \> \> If $\hatt = t$: Set the flag $\win\gets 1$ and Return $1$\\
+            \> \> \> If $\hatt = t$ and $\hatm\notin S$: Set the flag $\win\gets 1$ and Return $1$\\
+            \> \> \> Else If $\hatt = t$ and $\hatm\in S$: Return $1$\\
+            \> \> \> Else: Return $0$\\
             \> When $\calA$ halts, output the flag $\win$
         \end{tabbing}\end{minipage}
     \end{tabular}
