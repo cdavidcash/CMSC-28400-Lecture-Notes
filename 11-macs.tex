@@ -609,6 +609,19 @@ CBC-MAC is similar to CBC encryption. The main differences are that
 
 \end{enumerate}
 
+
+\begin{exercise} 
+
+    Consider a version of CBC-MAC where the length block is not used.  More
+    precisely, define $\MAC_0$ to be exactly like $\MAC$ above, change the line
+    just before the ``for'' loop to $v\gets 0^{128}$ instead of $v\gets\leng$.
+    Give a simple $\calA$ such that $\AdvUF{\MAC_0}{\calA}=1$.  (Hint: A single,
+    one-block query to $\MAC_0(k,\cdot)$ is enough.  The simplest attack I can
+    think of then forges a tag on a two-block message $\hatm$.)
+    This shows that we can't simply ignore then length block!
+
+\end{exercise}
+
 \begin{exercise}
     Requiring the length block at the start of the message is annoying,
     since it means you can't start processing until you know many bits
