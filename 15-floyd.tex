@@ -1,0 +1,337 @@
+\documentclass[11pt]{article}
+\usepackage{fullpage}
+\usepackage{amsthm}
+
+\usepackage{amsthm,amsmath,amsfonts,amssymb,amstext,enumitem}
+\usepackage{latexsym,ifthen,url,rotating,graphicx}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows,shapes,positioning,fit}
+\usepackage{graphicx}
+\usepackage[font=small,labelfont=bf]{caption}
+
+
+
+% --- -----------------------------------------------------------------
+% --- Document-specific definitions.
+% --- -----------------------------------------------------------------
+\lstset{
+    columns=fixed,
+    literate={—}{{---}}1 {…}{{...}}1
+}
+
+\newcommand{\todo}[1]{{\color{red}[TODO:{#1}]}}
+
+\newtheorem{problem}{Problem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{fact}{Fact}
+\newtheorem{exercise}{Exercise}
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+\newtheorem{notation}{Notation}
+\newtheorem{lemma}{Lemma}
+\newtheorem{example}{Example}
+
+\newcommand{\getsr}
+  {{\:\stackrel{\raisebox{-2pt}{${\scriptscriptstyle \hspace{0.2em}\$}$}}
+   {\leftarrow}\:}}
+\newcommand{\points}[1]{\textbf{({#1} pts)}}
+
+\newcommand{\fn}{\footnotesize}
+\newcommand{\Colon}{\ : \ }
+\newcommand{\st}{\mathsf{state}}
+\newcommand{\msgs}{\mathcal{M}}
+\newcommand{\ctxts}{\mathcal{C}}
+\newcommand{\keys}{\mathcal{K}}
+\newcommand{\rands}{\mathcal{R}}
+\newcommand{\states}{\mathcal{S}}
+\newcommand{\kg}{\mathcal{K}}
+\newcommand{\Enc}{\mathsf{Enc}}
+\newcommand{\Dec}{\mathsf{Dec}}
+\newcommand{\MAC}{\mathrm{Mac}}
+\newcommand{\Vrfy}{\mathrm{Vrfy}}
+\newcommand{\RMAC}{\mathrm{RMAC}}
+\newcommand{\tags}{\mathcal{T}}
+\newcommand{\testeq}{\stackrel{?}{=}}
+\newcommand{\win}{\mathsf{win}}
+\newcommand{\leng}{\mathsf{len}}
+
+\newcommand{\pk}{pk}
+\newcommand{\sk}{sk}
+
+\newcommand{\calD}{\mathcal{D}}
+\newcommand{\calA}{\mathcal{A}}
+\newcommand{\calE}{\mathcal{E}}
+\newcommand{\calB}{\mathcal{B}}
+\newcommand{\AES}{\mathsf{AES}}
+
+\newcommand{\algorithm}[1]{\textbf{Alg} {#1}}
+
+\newcommand{\calO}{\mathcal{O}}
+
+\newcommand{\dlog}{\mathrm{dlog}}
+
+\newcommand{\Adv}{\mathbf{Adv}}
+\newcommand{\AdvPRF}[2]{\Adv^{\mathrm{prf}}_{#1}({#2})}
+\newcommand{\AdvPRG}[2]{\Adv^{\mathrm{prg}}_{#1}({#2})}
+\newcommand{\AdvCPA}[2]{\Adv^{\mathrm{cpa}}_{#1}({#2})}
+\newcommand{\AdvCCA}[2]{\Adv^{\mathrm{cca}}_{#1}({#2})}
+\newcommand{\AdvKR}[2]{\Adv^{\mathrm{kr}}_{#1}({#2})}
+\newcommand{\AdvCKR}[2]{\Adv^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\AdvRMR}[2]{\Adv^{\mathrm{rmr}}_{#1}({#2})}
+\newcommand{\AdvCR}[2]{\Adv^{\mathrm{cr}}_{#1}({#2})}
+\newcommand{\AdvUFCMA}[2]{\Adv^{\textrm{uf{-}cma}}_{#1}({#2})}
+\newcommand{\AdvDL}[2]{\Adv^{\mathrm{dl}}_{#1}({#2})}
+
+\newcommand{\Exp}{\mathbf{Exp}}
+\newcommand{\ExpOW}[1]{\Exp^{\mathrm{ow}}({#1})}
+\newcommand{\ExpCKR}[2]{\Exp^{\mathrm{ckr}}_{#1}({#2})}
+\newcommand{\ExpRMR}[2]{\Exp^{\mathrm{rmr}}_{#1}({#2})}
+
+\newcommand{\concat}{{\,\|\,}}
+\newcommand{\xor}{\oplus}
+\newcommand{\bits}{\{0,1\}}
+
+\newcommand{\tcolh}{T^{\mathrm{col}}_h}
+\newcommand{\tcolH}{T^{\mathrm{col}}_{H^2}}
+\newcommand{\Hcomb}{H^{1\|2}}
+\newcommand{\Hxor}{H^{1\oplus2}}
+
+\newcommand{\EXP}{\textrm{EXP}}
+\newcommand{\MODEXP}{\textrm{MOD{-}EXP}}
+\newcommand{\ADD}{\textrm{ADD}}
+\newcommand{\MULTIMODEXP}{\textrm{MULTI{-}MOD{-}EXP}}
+\newcommand{\MUL}{\textrm{MUL}}
+\newcommand{\MOD}{\textrm{MOD}}
+
+\newcommand{\GG}{\mathbb{G}}
+\newcommand{\ZZ}{\mathbb{Z}}
+
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bof}{\mathbf{f}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bC}{\mathbf{C}}
+
+\newcommand{\rvrange}{\mathcal{R}}
+\newcommand{\rspace}{\mathcal{C}}
+
+\newcommand{\hatalpha}{\hat{\alpha}}
+\newcommand{\hatb}{\hat{b}}
+\newcommand{\hatc}{\hat{c}}
+\newcommand{\hatt}{\hat{t}}
+\newcommand{\hatm}{\hat{m}}
+
+\newcommand{\barm}{\overline{m}}
+
+\newcommand{\otp}{\mathrm{OTP}}
+\newcommand{\des}{\mathrm{DES}}
+\newcommand{\twodes}{\mathrm{2DES}}
+\newcommand{\threedes}{\mathrm{3DES}}
+\newcommand{\threedestwo}{\mathrm{3DES2}}
+\newcommand{\aes}{\mathrm{AES}}
+\newcommand{\pad}{\mathsf{pad}}
+\newcommand{\unpad}{\mathsf{unpad}}
+\newcommand{\Func}{\mathrm{Func}}
+\newcommand{\cbcmacpad}{\mathsf{pad}_{\mathrm{cbc}}}
+
+
+\newcommand{\Img}{\mathrm{Im}}
+
+\newcommand{\Expt}{\mathbf{Expt}}
+\newcommand{\ExptCPA}{\mathbf{Expt}^{\mathrm{cpa}}}
+\newcommand{\ExptCCA}{\mathbf{Expt}^{\mathrm{cca}}}
+\newcommand{\ExptOTCPA}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa}}}
+\newcommand{\ExptOTCPAone}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}1}}}
+\newcommand{\ExptOTCPAzero}{\mathbf{Expt}^{\mathrm{1\mbox{-}cpa\mbox{-}0}}}
+\newcommand{\AdvOTCPA}[2]{\Adv^{\mathrm{1\mbox{-}cpa}}_{#1}({#2})}
+\newcommand{\ExptCPAone}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}1}}}
+\newcommand{\ExptCPAzero}{\mathbf{Expt}^{\mathrm{cpa\mbox{-}0}}}
+\newcommand{\ExptUF}{\mathbf{Expt}^{\mathrm{uf}}}
+\newcommand{\AdvUF}[2]{\Adv^{\mathrm{uf}}_{#1}({#2})}
+
+\newcommand{\LR}{\mathrm{LR}}
+
+\newcommand{\Piotp}{\Pi_\mathrm{otp}}
+\newcommand{\Encotp}{\Enc_\mathrm{otp}}
+\newcommand{\Decotp}{\Dec_\mathrm{otp}}
+\newcommand{\bhat}{\hat{b}}
+\newcommand{\dict}{\mathtt{dict}}
+\newcommand{\Col}{\mathsf{Col}}
+% --- -----------------------------------------------------------------
+% --- Lecture notes formatting macros
+% --- -----------------------------------------------------------------
+
+%
+% The following commands set up the lecnum (lecture number)
+% counter and make various numbering schemes work relative
+% to the lecture number.
+%
+\newcounter{lecnum}
+%\renewcommand{\thepage}{\thelecnum-\arabic{page}}
+\renewcommand{\thesection}{\thelecnum.\arabic{section}}
+\renewcommand{\theexercise}{\thelecnum.\arabic{exercise}}
+\renewcommand{\theexample}{\thelecnum.\arabic{example}}
+\renewcommand{\thedefinition}{\thelecnum.\arabic{definition}}
+\renewcommand{\theequation}{\thelecnum.\arabic{equation}}
+\renewcommand{\thefigure}{\thelecnum.\arabic{figure}}
+\renewcommand{\thefact}{\thelecnum.\arabic{fact}}
+\renewcommand{\thetable}{\thelecnum.\arabic{table}}
+
+
+%
+% The following macro is used to generate the header.
+%
+\newcommand{\lecture}[2]{
+   %\pagestyle{myheadings}
+   %\thispagestyle{plain}
+   \newpage
+   \setcounter{lecnum}{#1}
+   \setcounter{page}{1}
+   \noindent
+   \begin{center}
+   \framebox{
+      \vbox{\vspace{2mm}
+    \hbox to 6.28in { {\bf CMSC 28400 Introduction to Cryptography
+                        \hfill Autumn 2020} }
+       \vspace{4mm}
+       \hbox to 6.28in { {\Large \hfill #2 \hfill} }
+       \vspace{2mm}
+       \hbox to 6.28in { {\it Instructor: David Cash} \hfill }
+      \vspace{2mm}}
+   }
+   \end{center}
+   %\markboth{Lecture #1: #2}{Lecture #1: #2}
+   \vspace*{4mm}
+}
+
+
+
+
+
+% --- -----------------------------------------------------------------
+% --- The document starts here.
+% --- -----------------------------------------------------------------
+\begin{document}
+%\lecture{**LECTURE-NUMBER**}{**DATE**}{**LECTURER**}{**SCRIBE**}
+\lecture{15}{Notes \#15: Analysis of Floyd's Cycle-Finding Algorithm}
+
+For all the claims below, let $f:X\to X$ be a function from some finite set $X$
+to itself and let $a_0 \in X$. Define a sequence of points in $X$ by $a_1 =
+f(a_0)$, $a_2 = f(a_1)=f(f(a_0))$, and in general for any positive integer $k$,
+\[
+    a_k = f^{(k)}(a_0),
+\]
+where $f^{(k)} = f(f(\cdots f(a_0)\cdots))$ is the function $f$ iterated $k$
+times.
+
+\begin{lemma}
+   There exist $I,J$ non-negative integers such that $I<J$ and $a_I = a_J$.
+\end{lemma}
+\begin{proof}
+    This follows by the pigeonhole principle, since $X$ is a finite set
+    and the sequence is infinite.
+\end{proof}
+
+\begin{lemma}\label{lem:period}
+    Let $I,J$ be the smallest non-negative integers such that $I<J$
+    and $a_I = a_J$.  Then the sequence $a_I,a_{I+1},\ldots$ is periodic, with
+    period $\Delta = J-I$. Moreover, the elements in a period are distinct.
+    In other words, for all $k\geq I$ and all $i>0$,
+    \[
+        a_{k+i} = a_k \iff \Delta|i.
+    \]
+\end{lemma}
+\begin{proof}
+    Intuitively, the picture from the video suggests
+    that the sequence is going around a circle of size $\Delta$ (and this
+    is definitely the way to understand the lemma!).  
+
+    Let us show the reverse implication first, namely that
+    for $k\geq I$,
+    if $i$ is a multiple of $\Delta$ then
+    $a_{k+i} = a_k$. 
+    We can use induction on $k$, starting at $k=I$. We assumed $a_I =
+    a_J = a_{I+\Delta}$, so it is true for $c=1$. For a general $c>1$,
+    \[
+        a_{k+c\Delta} = 
+        a_{k+c\Delta} = 
+        f^{(c\Delta)}(a_{k})
+        = f^{(\Delta)}(f^{((c-1)\Delta)}(a_{k}))
+        = f^{(\Delta)}(a_{k})= a_k,
+    \]
+    where we used the induction hypothesis for the equality 
+    $f^{((c-1)\Delta)}(a_{k})=a_{k}$.
+
+    %The ``moreover'' part follows by repeatedly applying the first part,
+    %so
+    %\[
+    %    a_k = a_{k+\Delta} = 
+    %    a_{k+\Delta+\Delta} = a_{k+\Delta+\Delta+\Delta} = \ldots.
+    %\]
+\end{proof}
+
+\begin{lemma}
+    Let $I,J,\Delta$ be as in Lemma~\ref{lem:period}. 
+    Then there exists an integer $i$ less than $J$ such that $a_i=a_{2i}$.
+    Moreover, any $i$ satisfying $a_i=a_{2i}$ must be a multiple of
+    $\Delta$.
+\end{lemma}
+\begin{proof}
+    %Take $\Delta = J-I$; 
+    %Then $0 < \Delta < J$. 
+    We show existence first.
+    We claim there exists an
+    integer $i$, $I\leq i < J$, that is a multiple of $\Delta$. To see
+    this, use division with remainder to conclude there exist integers
+    $q,r$ such that
+    \[
+        I = q\Delta + r, \quad 0\leq r < \Delta.
+    \]
+    Then if $r=0$ we can take $i = q\Delta$, and otherwise if $r>0$ we can take
+    $i=(q+1)\Delta$. In either case $i$ is clearly a multiple of $\Delta$ and
+    satisfies $i\geq I$.  We
+    claim also that in either case $i<J$. If $i=q\Delta = I$ then this
+    is true because we assumed $I<J$. If $i=(q+1)\Delta$ then
+    \[
+        i = (q+1)\Delta = q\Delta + \Delta = q\Delta + r + (\Delta-r) 
+        = I + (\Delta - r) < I + \Delta = J.
+    \]
+
+    Now assume we have an $I\leq i<J$ that is a multiple of $\Delta$.
+    The previous lemma 
+    (applied repeatedly) implies that
+    \[
+        a_{2i} = a_{i+i} = a_i,
+    \]
+    since adding a multiple of $\Delta$ leaves the value unchanged (and
+    $i$ is such a multiple!).
+
+    Now suppose $a_i=a_{2i}$. Then $i\geq I$ and $2i\geq J$ since we
+    chose $I,J$ to be the indexes of the first repetition.
+\end{proof}
+
+\begin{lemma}
+    Let $I,J$ be the smallest non-negative integers such that $I<J$ and $a_I =
+    a_J$ (that is, $J$ is the index of the first repeated value, and $I<J$ is
+    the index of the previous appearance).  If $i,\delta$ are non-negative
+    integers that satisfy $a_i = a_{i+\delta}$, then $\delta$ must be a
+    multiple of $\Delta = J-I$.
+\end{lemma}
+\begin{proof}
+    Suppose $\delta$ is not a multiple of $\Delta$.
+    By Lemma~\ref{lem:plusdelta}, we can assume
+\end{proof}
+
+\begin{lemma}
+    Let $I,J$ be the smallest non-negative integers such that $I<J$ and $a_I =
+    a_J$.  
+    If $i$ is a non-negative integer that satisfies $a_i = a_{2i}$, then we
+    also have
+    \[
+        a_{i+I} = a_I.
+    \]
+\end{lemma}
+
+\end{document}
+
