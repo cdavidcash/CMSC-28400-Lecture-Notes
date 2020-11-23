@@ -234,41 +234,68 @@ times.
 \end{proof}
 
 \begin{lemma}\label{lem:period}
-    Let $I,J$ be the smallest non-negative integers such that $I<J$
-    and $a_I = a_J$.  Then the sequence $a_I,a_{I+1},\ldots$ is periodic, with
-    period $\Delta = J-I$. Moreover, the elements in a period are distinct.
-    In other words, for all $k\geq I$ and all $i>0$,
+    Let $J$ be the smallest non-negative integer such that 
     \[
-        a_{k+i} = a_k \iff \Delta|i.
+        a_J \in \{a_0,\ldots,a_{J-1}\}.
     \]
+    This choice of $J$ implies there is a unique integer $0 \leq I < J$ such
+    that $a_I = a_J$.  Let $\Delta = J-I$.  Then for all $k\geq I$,
+    \[
+        a_k = a_{I+[k-I \bmod \Delta]}.
+    \]
+    Moreover, for $i,j\geq I$,
+    we have that $a_i = a_j$ if and only if $i \equiv j \bmod \Delta$.
 \end{lemma}
 \begin{proof}
     Intuitively, the picture from the video suggests
     that the sequence is going around a circle of size $\Delta$ (and this
     is definitely the way to understand the lemma!).  
 
-    Let us show the reverse implication first, namely that
-    for $k\geq I$,
-    if $i$ is a multiple of $\Delta$ then
-    $a_{k+i} = a_k$. 
-    We can use induction on $k$, starting at $k=I$. We assumed $a_I =
-    a_J = a_{I+\Delta}$. Applying this repeatedly
+    First we show that for any $q\geq 0$, 
     \[
-        a_{k+c\Delta} = 
-        a_{k+c\Delta} = 
-        f^{(c\Delta)}(a_{k})
-        = f^{(\Delta)}(f^{((c-1)\Delta)}(a_{k}))
-        = f^{(\Delta)}(a_{k})= a_k,
+        a_{I+q\Delta} = a_I.
     \]
-    where we used the induction hypothesis for the equality 
-    $f^{((c-1)\Delta)}(a_{k})=a_{k}$.
+    Use induction on $q$. For $q=0$ this is trivial. For $q>0$,
+    \begin{align*}
+        a_{I+q\Delta}  
+        & = f^{I+q\Delta}(a_0) \\
+        & = f^{(q-1)\Delta}(f^{I+\Delta}(a_0))\\
+        & = f^{(q-1)\Delta}(a_I)\\
+        & = a_I.
+    \end{align*}
+    The first equality is by definition, and the second is just rewriting
+    the applications of $f$ into two batches. The third equality uses
+    the assumption that $a_J = a_{I+\Delta} = a_I$. The last equality
+    is by the inductive hypothesis.
 
-    %The ``moreover'' part follows by repeatedly applying the first part,
-    %so
-    %\[
-    %    a_k = a_{k+\Delta} = 
-    %    a_{k+\Delta+\Delta} = a_{k+\Delta+\Delta+\Delta} = \ldots.
-    %\]
+    Let $k\geq I$. By division with remainder, we can write
+    $k-I = q\Delta + r$ with $0\leq r < \Delta$.
+    Then since $a_I = a_J$,
+    \[
+        a_k 
+        = a_{I + q\Delta + r}
+        = f^{I + q\Delta + r}(a_0)
+        = f^{r}(f^{I+q\Delta}(a_0))
+        = f^{r}(a_I)
+        = a_{I+r}.
+    \]
+    This proves the first part of the Lemma, since $r = [k-I\bmod \Delta]$.
+
+    Now for the second part. The first part already shows that if
+    $i\equiv j \bmod \Delta$ then 
+    \[
+        a_i 
+        = a_{I+[i-I\bmod \Delta]}
+        =a_{I+[j-I\bmod \Delta]}
+        = a_j.
+    \]
+    For the reverse direction, suppose $a_i = a_j$. Then $a_{I+[i-I\bmod
+    \Delta]} = a_{I+[j-I\bmod \Delta]}$ by the first part. But the elements
+    \[
+        a_I,a_{I+1},\ldots,a_{I+\Delta-1}
+    \]
+    are all distinct, so we must have $[i-I\bmod\Delta] = [j-I\bmod\Delta]$,
+    which implies $i\equiv j \bmod \Delta$.
 \end{proof}
 
 \begin{lemma}
